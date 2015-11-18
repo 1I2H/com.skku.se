@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.skku.se.MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textView_learning_list_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"
+            android:text="@string/learning_list_title"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignLeft="@+id/textView_learning_list_title"
+            android:layout_alignRight="@+id/textView_learning_list_title"
+            android:layout_below="@+id/textView_learning_list_title"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/darker_gray">
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout_learning_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/textView_learning_list_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:id="@+id/relativeLayout_file_input_output"
+                android:layout_width="match_parent"
+                android:layout_height="128dp"
+                android:clickable="true"
+                android:padding="8dp">
+
+                <com.github.lzyzsd.circleprogress.CircleProgress
+                    android:id="@+id/circle_progress_file_input_output"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:circle_progress="20"/>
+
+                <TextView
+                    android:id="@+id/textView_file_input_output_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@+id/circle_progress_file_input_output"
+                    android:password="false"
+                    android:text="파일 입/출력"
+                    android:textSize="18dp"/>
+
+                <FrameLayout
+                    android:id="@+id/frameLayout_file_input_output_borderline"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignLeft="@+id/textView_file_input_output_title"
+                    android:layout_below="@+id/textView_file_input_output_title"
+                    android:layout_marginTop="8dp"
+                    android:layout_toLeftOf="@+id/imageView_file_input_output_arrow"
+                    android:background="@android:color/darker_gray">
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/textView_file_input_output_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView_file_input_output_title"
+                    android:layout_below="@+id/frameLayout_file_input_output_borderline"
+                    android:layout_marginTop="8dp"
+                    android:text="파일 입력까지 진행"
+                    android:textSize="14sp"/>
+
+                <ImageView
+                    android:id="@+id/imageView_file_input_output_arrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/ic_next"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/button_continue_file_input_output"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView_file_input_output_title"
+                    android:layout_alignStart="@+id/textView_file_input_output_progress"
+                    android:layout_below="@+id/circle_progress_file_input_output"
+                    android:text="@string/continue_learning"/>
+
+                <Button
+                    android:id="@+id/button_see_sections_file_input_output"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/button_continue_file_input_output"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toEndOf="@+id/button_continue_file_input_output"
+                    android:layout_toRightOf="@+id/button_continue_file_input_output"
+                    android:text="@string/see_sections"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/relativeLayout_structure"
+                android:layout_width="match_parent"
+                android:layout_height="128dp"
+                android:layout_marginTop="16dp"
+                android:clickable="true"
+                android:padding="8dp">
+
+                <com.github.lzyzsd.circleprogress.CircleProgress
+                    android:id="@+id/circle_progress_structure"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:circle_progress="80"/>
+
+                <TextView
+                    android:id="@+id/textView_structure_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@+id/circle_progress_structure"
+                    android:password="false"
+                    android:text="구조체"
+                    android:textSize="18dp"/>
+
+                <FrameLayout
+                    android:id="@+id/frameLayout_structure_borderline"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignLeft="@+id/textView_structure_title"
+                    android:layout_below="@+id/textView_structure_title"
+                    android:layout_marginTop="8dp"
+                    android:background="@android:color/darker_gray">
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/textView_structure_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView_structure_title"
+                    android:layout_below="@+id/frameLayout_structure_borderline"
+                    android:layout_marginTop="8dp"
+                    android:text="구조체 포인터까지 진행"
+                    android:textSize="14sp"/>
+
+                <Button
+                    android:id="@+id/button_continue_structure"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView_structure_title"
+                    android:layout_alignStart="@+id/textView_structure_progress"
+                    android:layout_below="@+id/circle_progress_structure"
+                    android:text="@string/continue_learning"/>
+
+                <Button
+                    android:id="@+id/button_see_sections_structure"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/button_continue_structure"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toEndOf="@+id/button_continue_structure"
+                    android:layout_toRightOf="@+id/button_continue_structure"
+                    android:text="@string/see_sections"/>
+
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/relativeLayout_compile_flow"
+                android:layout_width="match_parent"
+                android:layout_height="128dp"
+                android:layout_marginTop="16dp"
+                android:clickable="true"
+                android:padding="8dp">
+
+                <com.github.lzyzsd.circleprogress.CircleProgress
+                    android:id="@+id/circle_progress_compile_flow"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:circle_progress="50"/>
+
+                <TextView
+                    android:id="@+id/textView_compile_flow_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@+id/circle_progress_compile_flow"
+                    android:password="false"
+                    android:text="컴파일 과정"
+                    android:textSize="18dp"/>
+
+                <FrameLayout
+                    android:id="@+id/frameLayout_compile_flow_borderline"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignLeft="@+id/textView_compile_flow_title"
+                    android:layout_below="@+id/textView_compile_flow_title"
+                    android:layout_marginTop="8dp"
+                    android:background="@android:color/darker_gray">
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/textView_compile_flow_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView_compile_flow_title"
+                    android:layout_below="@+id/frameLayout_compile_flow_borderline"
+                    android:layout_marginTop="8dp"
+                    android:text="링크까지 진행"
+                    android:textSize="14sp"/>
+
+                <Button
+                    android:id="@+id/button_continue_compile_flow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView_compile_flow_title"
+                    android:layout_alignStart="@+id/textView_compile_flow_progress"
+                    android:layout_below="@+id/circle_progress_compile_flow"
+                    android:text="@string/continue_learning"/>
+
+                <Button
+                    android:id="@+id/button_see_sections_compile_flow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/button_continue_compile_flow"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toEndOf="@+id/button_continue_compile_flow"
+                    android:layout_toRightOf="@+id/button_continue_compile_flow"
+                    android:text="@string/see_sections"/>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView_recent_q_and_a"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/linearLayout_learning_list"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal"
+            android:text="@string/recent_q_and_as"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignLeft="@+id/textView_recent_q_and_a"
+            android:layout_alignRight="@+id/textView_recent_q_and_a"
+            android:layout_below="@+id/textView_recent_q_and_a"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/darker_gray"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/textView_recent_q_and_a"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <include
+                layout="@layout/layout_qna_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <include
+                layout="@layout/layout_qna_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <include
+                layout="@layout/layout_qna_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</android.support.v4.widget.NestedScrollView>

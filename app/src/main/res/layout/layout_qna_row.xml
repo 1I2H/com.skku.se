@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textView_QnA_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/background_circle"
+        android:gravity="center"
+        android:text="Q"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="20sp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@+id/textView_QnA_icon"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="구조체 포인터"
+            android:textColor="@color/textColorTernary"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="구조체 포인터 접근에 대한 질문입니다."
+            android:textColor="@color/textColorPrimary"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="15/11/20"
+            android:textColor="@color/textColorTernary"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+</RelativeLayout>
