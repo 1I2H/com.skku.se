@@ -90,6 +90,12 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 		}
 	}
 
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		mSignInFragmentCallback = null;
+	}
+
 	public interface SignInFragmentCallback {
 		void onClickGoSignUpPageButton();
 	}

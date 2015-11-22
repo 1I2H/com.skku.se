@@ -80,6 +80,8 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 		alertDialogFragment.setMessage(R.string.welcome_message_3);
 		alertDialogFragment.setNumberOfButtons(1);
 		alertDialogFragment.setPositiveButtonText(R.string.confirm);
+		alertDialogFragment.setTargetFragment(this, 0);
+		alertDialogFragment.setCancelable(false);
 		alertDialogFragment.show(getFragmentManager(), "AlertDialogFragment");
 	}
 
@@ -100,6 +102,12 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 		} catch (ClassCastException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		mSignUpFragmentCallback = null;
 	}
 
 	@Override

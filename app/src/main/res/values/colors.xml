@@ -2,11 +2,17 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryLight">#406FCF</color>
     <color name="colorAccent">#FF4081</color>
 
     <color name="textColorPrimary">#000000</color>
     <color name="textColorSecondary">#FFFFFF</color>
     <color name="textColorTernary">#666666</color>
+    <color name="textColorFourth">#3F51B5</color>
 
     <color name="questionIconColor">#5DC0C2</color>
+    <color name="answerIconColor">#FF4081</color>
+    <color name="basicBackgroundColor">#FFFFFF</color>
+
+    <color name="rippleColor">#E4F3FC</color>
 </resources>

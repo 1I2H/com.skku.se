@@ -36,6 +36,15 @@ public class AlertDialogFragment extends DialogFragment {
 		mNegativeButtonTextResId = resId;
 	}
 
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		if (getTargetFragment() != null) {
+			mAlertDialogFragmentCallback = (AlertDialogFragmentCallback) getTargetFragment();
+		}
+	}
+
 	@NonNull
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {

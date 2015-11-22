@@ -1,5 +1,7 @@
 package com.skku.se;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -29,6 +31,8 @@ public class LearningActivity extends AppCompatActivity {
 
 	private int mCurrentPageNumber = 0;
 	private JSONArray mLearningContentsList;
+	private String mSectionName;
+	private String mChapterName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,13 +43,28 @@ public class LearningActivity extends AppCompatActivity {
 		MockServer.getInstance(this).makeLearningContentsList();
 		mLearningContentsList = MockServer.getInstance(this).getLearningContentsList();
 
+		Intent intent = getIntent();
+		if (intent != null) {
+			mChapterName = intent.getStringExtra(MainActivity.CHAPTER_NAME);
+			mSectionName = intent.getStringExtra(MainActivity.SECTION_NAME);
+		}
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+		}
+
+		configureToolbar();
+		configureFragmentViewPager();
+		configurePageControlButtons();
+	}
+
+	private void configureToolbar() {
 		mToolbar = (Toolbar) findViewById(R.id.toolbar_learning);
-		mToolbar.setTitle("파일 입/출력");
-		mToolbar.setSubtitle("File input stream");
+		mToolbar.setTitle(mSectionName);
+		mToolbar.setSubtitle(mChapterName);
+	}
 
-		//getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
-
+	private void configureFragmentViewPager() {
 		mLearningFragmentViewPager = (NoSwipeViewpager) findViewById(R.id.viewPager_learning);
 		mLearningFragmentViewPager.setPagingEnabled(false);
 		mLearningFragmentPagerAdapter = new LearningFragmentPagerAdapter(getSupportFragmentManager(), mLearningContentsList);
@@ -73,7 +92,9 @@ public class LearningActivity extends AppCompatActivity {
 
 			}
 		});
+	}
 
+	private void configurePageControlButtons() {
 		mPreviousButton = (Button) findViewById(R.id.button_previous_page);
 		mPreviousButton.setVisibility(View.INVISIBLE);
 		mPreviousButton.setOnClickListener(new View.OnClickListener() {
@@ -94,8 +115,6 @@ public class LearningActivity extends AppCompatActivity {
 				}
 			}
 		});
-
-
 	}
 
 	public static class LearningFragmentPagerAdapter extends FragmentStatePagerAdapter {

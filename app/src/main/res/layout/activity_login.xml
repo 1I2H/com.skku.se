@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.skku.se.MainActivity">
+    tools:context="com.skku.se.MainActivity"
+    android:background="@android:color/white">
 
     <com.skku.se.NoSwipeViewpager
         android:id="@+id/viewPager_login"
