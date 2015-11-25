@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relativeLayout_chapter"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:background="@color/basicBackgroundColor"
+    android:clickable="true"
+    android:padding="16dp">
+
+    <com.github.lzyzsd.circleprogress.CircleProgress
+        android:id="@+id/circle_progress_chapter"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:circle_finished_color="@color/colorAccent"
+        app:circle_progress="20"/>
+
+    <TextView
+        android:id="@+id/textView_chapter_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@+id/circle_progress_chapter"
+        android:password="false"
+        android:text="파일 입/출력"
+        android:textColor="@color/textColorFourth"
+        android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/textView_chapter_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView_chapter_title"
+        android:layout_below="@+id/textView_chapter_title"
+        android:text="파일 입력까지 진행"
+        android:textSize="13sp"/>
+
+    <ImageView
+        android:id="@+id/imageView_chapter_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_next"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/button_continue_chapter"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/circle_progress_chapter"
+        android:background="@drawable/ripple_button_click_feedback"
+        android:longClickable="true"
+        android:text="@string/continue_learning"
+        android:textColor="@color/textColorFourth"/>
+
+    <Button
+        android:id="@+id/button_see_sections_chapter"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_alignTop="@+id/button_continue_chapter"
+        android:layout_marginLeft="8dp"
+        android:layout_toEndOf="@+id/button_continue_chapter"
+        android:layout_toRightOf="@+id/button_continue_chapter"
+        android:background="@drawable/ripple_button_click_feedback"
+        android:text="@string/see_sections"
+        android:textColor="@color/textColorPrimary"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="beginner"
+        android:id="@+id/textView_learning_level_chapter"
+        android:layout_toRightOf="@+id/textView_chapter_title"
+        android:layout_toEndOf="@+id/textView_chapter_title"
+        android:layout_marginLeft="4dp"
+        android:textSize="12sp"
+        android:textColor="@color/textColorSecondary"
+        android:background="@drawable/background_beginner_level_icon"
+        android:padding="4dp"
+        android:layout_alignBottom="@+id/textView_chapter_title"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView_configure_learning_level_chapter"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_settings_black_24dp"
+        android:clickable="true"/>
+
+</RelativeLayout>

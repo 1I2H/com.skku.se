@@ -1,51 +1,50 @@
 package com.skku.se;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.lzyzsd.circleprogress.CircleProgress;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SyllabusFragment.SyllabusFragmentCallback {
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class MainActivity extends AppCompatActivity implements SyllabusFragment.SyllabusFragmentCallback,
+		AlertDialogFragment.AlertDialogFragmentCallback {
 	private static final String TAG = "MainActivity";
 
-	private static final int FILE_INPUT_OUTPUT_CHAPTER_NUMBER = 1;
-	private static final int STRUCTURE_CHAPTER_NUMBER = 2;
-	private static final int COMPILE_FLOW_CHAPTER_NUMBER = 3;
+	public static final int FILE_INPUT_OUTPUT_CHAPTER_NUMBER = 1;
+	public static final int STRUCTURE_CHAPTER_NUMBER = 2;
+	public static final int COMPILE_FLOW_CHAPTER_NUMBER = 3;
 
 	public static final String CHAPTER_NAME = "chapter_name";
 	public static final String SECTION_NAME = "section_name";
 
-	private TextView mFileInputOutputProgressTextView;
-	private TextView mStructureProgressTextView;
-	private TextView mCompileFlowProgressTextView;
-
-	private CircleProgress mFileInputOutputCircleProgress;
-	private CircleProgress mStructureCircleProgress;
-	private CircleProgress mCompileFlowCircleProgress;
-
-	private Button mContinueFileInputOutputButton;
-	private Button mContinueStructureButton;
-	private Button mContinueCompileFlowCircleButton;
-
-	private Button mSeeFileInputOutputSyllabusButton;
-	private Button mSeeStructureSyllabusButton;
-	private Button mSeeCompileFlowSyllabusButton;
-
+	private LinearLayout mLearningChapterListLinearLayout;
 	private LinearLayout mQnALinearLayout;
+
+	private JSONArray mLearningInfo;
+	private JSONArray mQnAList;
+
+	private CircleProgress mTempCircleProgress;
+	private TextView mTempChapterProgressTextView;
+	private TextView mTempTextView;
+	private JSONObject mTempLearningChapterContent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,101 +53,144 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-			}
-		});
+		/* hard-coded part */
+		JSONObject overAllContents = MockServer.getInstance(this).makeOverallContents().getOverAllContents();
+		mLearningInfo = overAllContents.optJSONArray("learningInfo");
+		mQnAList = overAllContents.optJSONArray("qnA");
 
 		configureLearningList();
 		configureQnAList();
 	}
 
+	@Override
+	public void onBackPressed() {
+		if (getSupportFragmentManager().getBackStackEntryCount() >= 1) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
+			}
+		}
+		super.onBackPressed();
+	}
+
 	private void configureLearningList() {
-		// 파일 입/출력 부분 학습 진행 현황 텍스트 GUI
-		mFileInputOutputProgressTextView = (TextView) findViewById(R.id.textView_file_input_output_progress);
-		mFileInputOutputProgressTextView.setText("미실시");
+		configureLearningChapterList();
+		configureQnAList();
+	}
 
-		// 구조체 학습 진행 현황 텍스트 GUI
-		mStructureProgressTextView = (TextView) findViewById(R.id.textView_structure_progress);
-		mStructureProgressTextView.setText("미실시");
+	private void configureLearningLevelView() {
 
-		// 컴파일 과정 학습 진행 현황 텍스트 GUI
-		mCompileFlowProgressTextView = (TextView) findViewById(R.id.textView_compile_flow_progress);
-		mCompileFlowProgressTextView.setText("미실시");
+	}
 
-		// 파일 입/출력 진행도 GUI 객채화 및 출력할 %값 설정
-		mFileInputOutputCircleProgress = (CircleProgress) findViewById(R.id.circle_progress_file_input_output);
-		mFileInputOutputCircleProgress.setMax(100);
-		mFileInputOutputCircleProgress.setProgress(40);
+	private void configureLearningChapterList() {
+		mLearningChapterListLinearLayout = (LinearLayout) findViewById(R.id.linearLayout_learning_chapter_list);
 
-		// 구조체 진행도 GUI 객체화 및 출력할 %값 설정
-		mStructureCircleProgress = (CircleProgress) findViewById(R.id.circle_progress_structure);
-		mStructureCircleProgress.setMax(100);
-		mStructureCircleProgress.setProgress(75);
+		try {
+			for (int i = 0; i < mLearningInfo.length(); i++) {
+				View chapterRow = inflateChapterRow();
+				configureChapterRow(chapterRow, i);
+				mLearningChapterListLinearLayout.addView(chapterRow);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 
-		// 컴파일 과정 GUI 객채화 및 출력할 %값 설정
-		mCompileFlowCircleProgress = (CircleProgress) findViewById(R.id.circle_progress_compile_flow);
-		mCompileFlowCircleProgress.setMax(100);
-		mCompileFlowCircleProgress.setProgress(25);
+	private View inflateChapterRow() {
+		View chapterRow = LayoutInflater.from(this).inflate(R.layout.layout_chapter_row, mLearningChapterListLinearLayout, false);
+		LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) chapterRow.getLayoutParams();
+		int marginTopValue = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+		layoutParams.setMargins(0, marginTopValue, 0, 0);
+		chapterRow.setLayoutParams(layoutParams);
 
-		// 파일 입/출력 이어하기 버튼 설정
-		mContinueFileInputOutputButton = (Button) findViewById(R.id.button_continue_file_input_output);
-		mContinueFileInputOutputButton.setOnClickListener(this);
+		return chapterRow;
+	}
 
-		// 구조체 이어하기 버튼 설정
-		mContinueStructureButton = (Button) findViewById(R.id.button_continue_structure);
-		mContinueStructureButton.setOnClickListener(this);
+	private void configureChapterRow(View chapterRow, int index) throws JSONException {
+		final CircleProgress circleProgress = (CircleProgress) chapterRow.findViewById(R.id.circle_progress_chapter);
+		TextView chapterTitleTextView = (TextView) chapterRow.findViewById(R.id.textView_chapter_title);
+		final TextView chapterProgressTextView = (TextView) chapterRow.findViewById(R.id.textView_chapter_progress);
+		final Button continueChapterButton = (Button) chapterRow.findViewById(R.id.button_continue_chapter);
+		final Button seeSectionsChapterButton = (Button) chapterRow.findViewById(R.id.button_see_sections_chapter);
+		final TextView learningLevelChapterTextView = (TextView) chapterRow.findViewById(R.id.textView_learning_level_chapter);
+		ImageView configureLearningLevelChapterImageView = (ImageView) chapterRow.findViewById(R.id.imageView_configure_learning_level_chapter);
 
-		// 컴파일 과정 이어하기 버튼 설정
-		mContinueCompileFlowCircleButton = (Button) findViewById(R.id.button_continue_compile_flow);
-		mContinueCompileFlowCircleButton.setOnClickListener(this);
+		///////////////////
+		final JSONObject learningChapterContent = mLearningInfo.optJSONObject(index);
 
-		// 파일 입/출력 학습 목록 보기 버튼 설정
-		mSeeFileInputOutputSyllabusButton = (Button) findViewById(R.id.button_see_sections_file_input_output);
-		mSeeFileInputOutputSyllabusButton.setOnClickListener(this);
+		final int chapterNumber = index + 1;
+		final int currentSectionNumber;
+		final String chapterTitle = learningChapterContent.optString("title");
+		final float progress;
 
-		// 구조체 학습 목롭 보기 버튼 설정
-		mSeeStructureSyllabusButton = (Button) findViewById(R.id.button_see_sections_structure);
-		mSeeStructureSyllabusButton.setOnClickListener(this);
+		if (learningChapterContent.getInt("level") == 1) {
+			learningLevelChapterTextView.setText("Beginner");
+			chapterProgressTextView.setText(learningChapterContent.getString("beginnerProgressDetail"));
 
-		// 컴파일 과정 이어하기 버튼 설정
-		mSeeCompileFlowSyllabusButton = (Button) findViewById(R.id.button_see_sections_compile_flow);
-		mSeeCompileFlowSyllabusButton.setOnClickListener(this);
+			currentSectionNumber = learningChapterContent.optInt("beginnerCurrentSection");
+			progress = (float) learningChapterContent.optInt("beginnerCurrentSection") /
+					(float) learningChapterContent.optInt("beginnerSectionCount") * 100;
+		} else {
+			learningLevelChapterTextView.setText("Intermediate");
+			learningLevelChapterTextView.setBackgroundResource(R.drawable.background_intermediate_level_icon);
+			chapterProgressTextView.setText(learningChapterContent.getString("intermediateProgressDetail"));
+
+			currentSectionNumber = learningChapterContent.optInt("intermediateCurrentSection");
+			progress = (float) learningChapterContent.optInt("intermediateCurrentSection") /
+					(float) learningChapterContent.optInt("intermediateSectionCount") * 100;
+		}
+
+		circleProgress.setProgress((int) progress);
+		chapterTitleTextView.setText(chapterTitle);
+
+		continueChapterButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showLearningContents(chapterNumber, currentSectionNumber);
+			}
+		});
+		seeSectionsChapterButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showSyllabus(chapterTitle, chapterNumber);
+			}
+		});
+		configureLearningLevelChapterImageView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//Toast.makeText(v.getContext(), "LEVEL CHANGE", Toast.LENGTH_SHORT).show();
+				mTempLearningChapterContent = learningChapterContent;
+				mTempCircleProgress = circleProgress;
+				mTempTextView = learningLevelChapterTextView;
+				mTempChapterProgressTextView = chapterProgressTextView;
+
+				AlertDialogFragment alertDialogFragment = new AlertDialogFragment();
+				alertDialogFragment.setDialogStyle(AlertDialogFragment.RADIO_BUTTON_STYLE);
+				alertDialogFragment.setTitle(R.string.select_learning_level);
+				alertDialogFragment.setSelectionStringArray(R.array.learning_level_list);
+				alertDialogFragment.show(getSupportFragmentManager(), "alertDialog");
+			}
+		});
 	}
 
 	private void configureQnAList() {
 		/* Q&A 목록 설정 */
 		mQnALinearLayout = (LinearLayout) findViewById(R.id.linearLayout_qna);
 
-		int numberOfQuestion = 5;
-		int numberOfAnswer = 3;
-
-		for (int i = 0; i < numberOfQuestion + numberOfAnswer; i++) {
+		for (int i = 0; i < mQnAList.length(); i++) {
 			// 질문과 답의 아이디를 비교하여 비슷하면 질문 바로 밑에 답변을 출력하도록 짜야함
 			// 현재 서버 API가 완성되지 않았기 때문에 간단하게 코드만 작성
-			View qnARow;
-			if (i % 2 == 0) {
-				qnARow = inflateQnARow(true);
-			} else {
-				qnARow = inflateQnARow(false);
-			}
+			JSONObject qnAContent = mQnAList.optJSONObject(i);
 
-			TextView qnAIconTextView = (TextView) qnARow.findViewById(R.id.textView_QnA_icon);
-			TextView qnASectionNameTextView = (TextView) qnARow.findViewById(R.id.textView_section_name);
-			TextView qnADetailTextView = (TextView) qnARow.findViewById(R.id.textView_qna_detail);
-			TextView qnADateTextView = (TextView) qnARow.findViewById(R.id.textView_date);
+			View questionRow = inflateQnARow(true);
+			configureQnARow(questionRow, qnAContent, true);
+			mQnALinearLayout.addView(questionRow);
 
-			if (i % 2 == 0) {
-				qnAIconTextView.setText("Q");
-				qnAIconTextView.setBackground(getResources().getDrawable(R.drawable.background_question_icon));
-			} else {
-				qnAIconTextView.setText("A");
-				qnAIconTextView.setBackground(getResources().getDrawable(R.drawable.background_answer_icon));
+			if (!qnAContent.isNull("answerDate")) {
+				View answerRow;
+				answerRow = inflateQnARow(false);
+				configureQnARow(answerRow, qnAContent, false);
+				mQnALinearLayout.addView(answerRow);
 			}
-			mQnALinearLayout.addView(qnARow);
 		}
 	}
 
@@ -164,28 +206,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		return qnARow;
 	}
 
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-			case R.id.button_continue_file_input_output:
-				showLearningContents(1, 1);
-				break;
-			case R.id.button_continue_structure:
-				showLearningContents(2, 1);
-				break;
-			case R.id.button_continue_compile_flow:
-				showLearningContents(3, 1);
-				break;
-			case R.id.button_see_sections_file_input_output:
-				showSyllabus("파일 입/출력", FILE_INPUT_OUTPUT_CHAPTER_NUMBER);
-				break;
-			case R.id.button_see_sections_structure:
-				showSyllabus("구조체", STRUCTURE_CHAPTER_NUMBER);
-				break;
-			case R.id.button_see_sections_compile_flow:
-				showSyllabus("컴파일 과정", COMPILE_FLOW_CHAPTER_NUMBER);
-				break;
+	private void configureQnARow(View qnARow, JSONObject qnAContent, boolean isQuestion) {
+		TextView qnAIconTextView = (TextView) qnARow.findViewById(R.id.textView_QnA_icon);
+		TextView qnASectionNameTextView = (TextView) qnARow.findViewById(R.id.textView_section_name);
+		TextView qnADetailTextView = (TextView) qnARow.findViewById(R.id.textView_qna_detail);
+		TextView qnADateTextView = (TextView) qnARow.findViewById(R.id.textView_date);
+
+		if (isQuestion) {
+			qnAIconTextView.setText("Q");
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+				qnAIconTextView.setBackground(getResources().getDrawable(R.drawable.background_question_icon));
+			} else {
+				qnAIconTextView.setBackground(getDrawable(R.drawable.background_question_icon));
+			}
+			qnADetailTextView.setText(qnAContent.optString("question"));
+			qnADateTextView.setText(qnAContent.optString("questionDate"));
+		} else {
+			qnAIconTextView.setText("A");
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+				qnAIconTextView.setBackground(getResources().getDrawable(R.drawable.background_answer_icon));
+			} else {
+				qnAIconTextView.setBackground(getDrawable(R.drawable.background_answer_icon));
+			}
+			qnADetailTextView.setText(qnAContent.optString("answer"));
+			qnADateTextView.setText(qnAContent.optString("answerDate"));
 		}
+		qnASectionNameTextView.setText(qnAContent.optString("sectionName"));
+	}
+
+	private float computeLearningProgress(int currentSectionNumber, int sectionNumber) {
+		return (float) currentSectionNumber / (float) sectionNumber * 100;
+	}
+
+	private void updateLearningChapterView(String level, int levelIconResId, String progressDetail, float progress) {
+		mTempTextView.setText(level);
+		mTempTextView.setBackgroundResource(levelIconResId);
+		mTempChapterProgressTextView.setText(progressDetail);
+		mTempCircleProgress.setProgress((int) progress);
 	}
 
 	@Override
@@ -274,7 +331,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	}
 
 	@Override
-	public void onFragmentInteraction(Uri uri) {
+	public void onClickNavigationBackButton() {
+		getSupportFragmentManager().popBackStack();
+	}
 
+	@Override
+	public void onClickPositiveButton() {
+
+	}
+
+	@Override
+	public void onClickNegativeButton() {
+
+	}
+
+	@Override
+	public void onClickSelectionButton(int index) {
+		String levelTextString = getResources().getStringArray(R.array.learning_level_list)[index];
+		try {
+			if (index == 0) {
+				updateLearningChapterView(levelTextString,
+						R.drawable.background_beginner_level_icon,
+						mTempLearningChapterContent.getString("beginnerProgressDetail"),
+						computeLearningProgress(mTempLearningChapterContent.optInt("beginnerCurrentSection"),
+								mTempLearningChapterContent.optInt("beginnerSectionCount")));
+			} else {
+				updateLearningChapterView(levelTextString,
+						R.drawable.background_intermediate_level_icon,
+						mTempLearningChapterContent.getString("intermediateProgressDetail"),
+						computeLearningProgress(mTempLearningChapterContent.optInt("intermediateCurrentSection"),
+								mTempLearningChapterContent.optInt("intermediateSectionCount")));
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 }

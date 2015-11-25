@@ -3,6 +3,7 @@ package com.skku.se;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -63,12 +64,25 @@ public class SyllabusFragment extends Fragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		Toolbar mToolbar = (Toolbar) view.findViewById(R.id.toolbar_syllabus);
-		mToolbar.setTitle(mChapterTitle);
+		configureToolbar(view);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+		}
 
 		LinearLayout syllabusLinearLayout = (LinearLayout) view.findViewById(R.id.linearLayout_syllabus);
 
-		for (int i = 0; i < 10; i++) {
+		// TODO change the hard-coded string
+		String[] syllabus;
+		if (mChapterNumber == MainActivity.STRUCTURE_CHAPTER_NUMBER) {
+			String[] structureSyllabus = {"기본 개념 정의 및 이해", "구조체 선언 및 초기화", "구조체 member 접근", "구조체 포인터", "함수와 할당"};
+			syllabus = structureSyllabus;
+		} else {
+			String[] otherSyllabus = {""};
+			syllabus = otherSyllabus;
+		}
+
+		for (int i = 0; i < syllabus.length; i++) {
 			View sectionRowView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_section_row, syllabusLinearLayout, false);
 
 			TextView sectionNumberIconTextView = (TextView) sectionRowView.findViewById(R.id.textView_section_number_icon);
@@ -77,7 +91,8 @@ public class SyllabusFragment extends Fragment {
 			final int sectionNumber = i + 1;
 
 			TextView sectionNameTextView = (TextView) sectionRowView.findViewById(R.id.textView_section_name);
-			sectionNameTextView.setText("기본 개념 정의 및 이해");
+
+			sectionNameTextView.setText(syllabus[i]);
 
 			sectionRowView.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -88,7 +103,21 @@ public class SyllabusFragment extends Fragment {
 
 			syllabusLinearLayout.addView(sectionRowView);
 		}
+	}
 
+	private void configureToolbar(View rootView) {
+		Toolbar mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar_syllabus);
+		mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
+		mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+					getActivity().getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
+				}
+				mSyllabusFragmentCallback.onClickNavigationBackButton();
+			}
+		});
+		mToolbar.setTitle(mChapterTitle);
 	}
 
 	private void showLearningContents(int chapterNumber, int sectionNumber) {
@@ -158,8 +187,6 @@ public class SyllabusFragment extends Fragment {
 	}
 
 	public interface SyllabusFragmentCallback {
-		// TODO: Update argument type and name
-		public void onFragmentInteraction(Uri uri);
+		void onClickNavigationBackButton();
 	}
-
 }

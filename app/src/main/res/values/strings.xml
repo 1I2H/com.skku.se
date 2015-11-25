@@ -14,9 +14,26 @@
     <string name="continue_learning">계속 배우기</string>
     <string name="see_sections">섹션 목록</string>
     <string name="recent_q_and_as">최근 질문 목록</string>
+    <string name="select_learning_level">학습 레벨 선택</string>
     <string name="sign_out">로그아웃</string>
+
+    <string name="practical">실습해보기</string>
+    <string name="copy_code">코드복사</string>
+
+    <string name="hint_code">
+        "힌트 코드:\n\n"
+
+        "#include &lt;stdio.h&gt;\n\n"
+
+        "int main() {\n"
+        "\t""printf(\"hello world\");\n"
+        "\t""return 0;\n"
+        "}\n"
+    </string>
+
     <string name="next_page">다음으로</string>
     <string name="previous_page">이전으로</string>
+
     <string name="bookmark">북마크</string>
 
     <string name="confirm">확인</string>

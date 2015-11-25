@@ -16,10 +16,11 @@
         android:id="@+id/toolbar_learning"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/transparent"
+        android:background="@color/colorPrimary"
+        android:theme="@style/AppTheme.AppBarOverlay"
         app:popupTheme="@style/AppTheme.PopupOverlay"/>
 
-    <ImageButton
+    <!--<ImageButton
         android:id="@+id/imageButton_bookmark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,34 +31,39 @@
         android:layout_marginTop="8dp"
         android:background="@null"
         android:padding="8dp"
-        android:src="@drawable/ic_bookmark_border_black_24dp"/>
+        android:src="@drawable/ic_bookmark_border_black_24dp"/>-->
 
-    <Button
-        android:id="@+id/button_previous_page"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:background="@null"
-        android:text="@string/previous_page"
-        android:textColor="@color/colorPrimary"
-        android:textSize="16sp"/>
+        android:background="#BFFFFFFF"
+        android:layout_alignParentBottom="true">
 
-    <Button
-        android:id="@+id/button_next_page"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="8dp"
-        android:layout_marginRight="8dp"
-        android:background="@null"
-        android:text="@string/next_page"
-        android:textColor="@color/colorPrimary"
-        android:textSize="16sp"/>
+        <Button
+            android:id="@+id/button_previous_page"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="false"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="8dp"
+            android:background="@null"
+            android:text="@string/previous_page"
+            android:textColor="@color/colorPrimary"
+            android:textSize="16sp"/>
+
+        <Button
+            android:id="@+id/button_next_page"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="false"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="8dp"
+            android:background="@null"
+            android:text="@string/next_page"
+            android:textColor="@color/colorPrimary"
+            android:textSize="16sp"/>
+    </RelativeLayout>
 
 
 </RelativeLayout>

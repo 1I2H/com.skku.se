@@ -69,7 +69,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 		mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mSignUpFragmentCallback.onBackButton();
+				mSignUpFragmentCallback.onClickNavigationBackButton();
 			}
 		});
 		mSignUpButton.setOnClickListener(this);
@@ -123,7 +123,12 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 
 	}
 
+	@Override
+	public void onClickSelectionButton(int index) {
+
+	}
+
 	public interface SignUpFragmentCallback {
-		void onBackButton();
+		void onClickNavigationBackButton();
 	}
 }

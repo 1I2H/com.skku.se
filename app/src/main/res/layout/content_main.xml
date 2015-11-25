@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.skku.se.MainActivity"
     tools:showIn="@layout/activity_main">
@@ -17,24 +18,24 @@
             android:id="@+id/textView_learning_list_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="24dp"
             android:text="@string/learning_list_title"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginLeft="16dp"/>
+            android:textStyle="bold"/>
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@+id/textView_learning_list_title"
-            android:layout_marginTop="8dp"
-            android:background="@android:color/darker_gray"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp">
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/darker_gray">
         </FrameLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayout_learning_list"
+            android:id="@+id/linearLayout_learning_chapter_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/textView_learning_list_title"
@@ -42,7 +43,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <RelativeLayout
+            <!--<RelativeLayout
                 android:id="@+id/relativeLayout_file_input_output"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
@@ -108,6 +109,30 @@
                     android:text="@string/see_sections"
                     android:textColor="@color/textColorPrimary"/>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="beginner"
+                    android:id="@+id/textView_learning_level_file_input_output"
+                    android:layout_toRightOf="@+id/textView_file_input_output_title"
+                    android:layout_toEndOf="@+id/textView_file_input_output_title"
+                    android:layout_marginLeft="4dp"
+                    android:textSize="12sp"
+                    android:textColor="@color/textColorSecondary"
+                    android:background="@drawable/background_beginner_level_icon"
+                    android:padding="4dp"
+                    android:layout_alignBottom="@+id/textView_file_input_output_title"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageView_configure_learning_level_file_input_output"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_settings_black_24dp"
+                    android:clickable="true"/>
+
             </RelativeLayout>
 
             <RelativeLayout
@@ -167,6 +192,30 @@
                     android:background="@drawable/ripple_button_click_feedback"
                     android:text="@string/see_sections"
                     android:textColor="@color/textColorPrimary"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="beginner"
+                    android:id="@+id/textView_learning_level_structure"
+                    android:layout_marginLeft="4dp"
+                    android:textSize="12sp"
+                    android:layout_toRightOf="@+id/textView_structure_title"
+                    android:layout_toEndOf="@id/textView_structure_title"
+                    android:textColor="@color/textColorSecondary"
+                    android:background="@drawable/background_beginner_level_icon"
+                    android:padding="4dp"
+                    android:layout_alignBottom="@+id/textView_structure_title"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageView_configure_learning_level_structure"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_settings_black_24dp"
+                    android:clickable="true"/>
 
 
             </RelativeLayout>
@@ -229,7 +278,31 @@
                     android:text="@string/see_sections"
                     android:textColor="@color/textColorPrimary"/>
 
-            </RelativeLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="beginner"
+                    android:id="@+id/textView_learning_level_compile_flow"
+                    android:layout_marginLeft="4dp"
+                    android:textSize="12sp"
+                    android:layout_toRightOf="@+id/textView_compile_flow_title"
+                    android:layout_toEndOf="@id/textView_compile_flow_title"
+                    android:textColor="@color/textColorSecondary"
+                    android:background="@drawable/background_beginner_level_icon"
+                    android:padding="4dp"
+                    android:layout_alignBottom="@+id/textView_compile_flow_title"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/imageView_configure_learning_level_compile_flow"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:src="@drawable/ic_settings_black_24dp"
+                    android:clickable="true"/>
+
+            </RelativeLayout>-->
 
         </LinearLayout>
 
@@ -237,23 +310,22 @@
             android:id="@+id/textView_recent_q_and_a"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/linearLayout_learning_list"
+            android:layout_below="@+id/linearLayout_learning_chapter_list"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="8dp"
             android:gravity="center_horizontal"
             android:text="@string/recent_q_and_as"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginLeft="16dp"
-            />
+            android:textStyle="bold"/>
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@+id/textView_recent_q_and_a"
-            android:layout_marginTop="8dp"
-            android:background="@android:color/darker_gray"
             android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"/>
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/darker_gray"/>
 
         <LinearLayout
             android:id="@+id/linearLayout_qna"

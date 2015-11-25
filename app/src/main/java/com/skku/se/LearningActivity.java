@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -147,9 +148,6 @@ public class LearningActivity extends AppCompatActivity {
 		public int mPageType;
 		public JSONObject mPageLearningContents;
 
-		/* Views for learning template one */
-		private TextView mLearningContentsTextView;
-
 		/**
 		 * Create a new instance of CountingFragment, providing "num"
 		 * as an argument.
@@ -192,10 +190,10 @@ public class LearningActivity extends AppCompatActivity {
 					configureLearningTemplateOneView(templateView);
 					break;
 				case LEARNING_TEMPLATE_TWO:
-					templateView = inflater.inflate(R.layout.fragment_learning_template_one, container, false);
+					templateView = inflater.inflate(R.layout.fragment_learning_template_two, container, false);
 					break;
 				case LEARNING_TEMPLATE_THREE:
-					templateView = inflater.inflate(R.layout.fragment_learning_template_one, container, false);
+					templateView = inflater.inflate(R.layout.fragment_learning_template_three, container, false);
 					break;
 				default:
 					templateView = inflater.inflate(R.layout.fragment_learning_template_one, container, false);
@@ -210,8 +208,42 @@ public class LearningActivity extends AppCompatActivity {
 		}
 
 		private void configureLearningTemplateOneView(View templateView) {
-			mLearningContentsTextView = (TextView) templateView.findViewById(R.id.textView_learning_contents);
-			mLearningContentsTextView.setText(mPageLearningContents.optString("pageInfo") + mPageLearningContents.optInt("subSectionNumber"));
+			TextView learningContentsTextView = (TextView) templateView.findViewById(R.id.textView_learning_contents);
+			learningContentsTextView.setText(mPageLearningContents.optString("pageInfo") + mPageLearningContents.optInt("subSectionNumber"));
+		}
+
+		private void configureLearningTemplateTwoView(View templateView) {
+
+		}
+
+		private void configureLearningTemplateThreeView(View templateView) {
+			TextView practicalProblemTextView = (TextView) templateView.findViewById(R.id.textView_practical_problem);
+			TextView hintCodeTextView = (TextView) templateView.findViewById(R.id.textView_hint_code);
+			Button copyCodeButton = (Button) templateView.findViewById(R.id.button_copy);
+			WebView practicalWebView = (WebView) templateView.findViewById(R.id.webView_practical);
+
+			// 실습창을 위한 webview
+			practicalWebView.loadUrl("http://cpp.sh/");
+			practicalWebView.getSettings().setJavaScriptEnabled(true);
+			practicalWebView.setVerticalScrollBarEnabled(true);
+		}
+
+		@Override
+		public void onViewCreated(View templateView, Bundle savedInstanceState) {
+			super.onViewCreated(templateView, savedInstanceState);
+			switch (mPageType) {
+				case LEARNING_TEMPLATE_ONE:
+					configureLearningTemplateOneView(templateView);
+					break;
+				case LEARNING_TEMPLATE_TWO:
+					configureLearningTemplateTwoView(templateView);
+					break;
+				case LEARNING_TEMPLATE_THREE:
+					configureLearningTemplateThreeView(templateView);
+					break;
+				default:
+					break;
+			}
 		}
 	}
 }

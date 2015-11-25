@@ -14,5 +14,8 @@
     <color name="answerIconColor">#FF4081</color>
     <color name="basicBackgroundColor">#FFFFFF</color>
 
+    <color name="beginnerLevelColor">#5DC0C2</color>
+    <color name="intermediateLevelColor">#F1C930</color>
+
     <color name="rippleColor">#E4F3FC</color>
 </resources>

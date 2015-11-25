@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity implements SignInFragment.S
 	}
 
 	@Override
-	public void onBackButton() {
+	public void onClickNavigationBackButton() {
 		mNoSwipeViewpager.setCurrentItem(0);
 	}
 
