@@ -3,14 +3,28 @@ package com.skku.se;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.navercorp.volleyextensions.volleyer.Volleyer;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -75,6 +89,76 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 		mSignUpButton.setOnClickListener(this);
 	}
 
+	private boolean isUserInputDataValid() {
+		String emailAddress = mSignUpIdEditText.getText().toString();
+		if (isValidEmail(emailAddress)) {
+			return !emailAddress.isEmpty() && !mSignUpPasswordEditText.getText().toString().isEmpty();
+		} else {
+			Toast.makeText(getActivity(), "잘 못된 이메일 형식입니다.", Toast.LENGTH_SHORT).show();
+			return false;
+		}
+	}
+
+	private JSONObject makeJSONTypeUserInputData() {
+		try {
+			JSONObject userInputData = new JSONObject();
+			userInputData.put("email", mSignUpIdEditText.getText().toString());
+			userInputData.put("password", mSignUpPasswordEditText.getText().toString());
+
+			return userInputData;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	private boolean isValidEmail(String email) {
+		boolean err = false;
+
+		String regex = "^[_a-zA-Z0-9-\\.]+@[\\.a-zA-Z0-9-]+\\.[a-zA-Z]+$";
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(email);
+
+		if (m.matches()) {
+			err = true;
+		}
+		return err;
+	}
+
+	private void uploadSignUpUserData() {
+		if (isUserInputDataValid()) {
+			mSignUpFragmentCallback.startProgressBar();
+			Volleyer.volleyer().post(getResources().getString(R.string.root_url) + "user").addHeader("Content-Type", "application/json")
+					.withBody(makeJSONTypeUserInputData().toString()).withListener(new Response.Listener<String>() {
+				@Override
+				public void onResponse(String response) {
+					mSignUpFragmentCallback.stopProgressBar();
+					try {
+						saveSessionInSharedPreference((new JSONObject(response).optInt("userId")));
+						Log.d(TAG, response.toString());
+						showWelcomeDialog();
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			}).withErrorListener(new Response.ErrorListener() {
+				@Override
+				public void onErrorResponse(VolleyError error) {
+					mSignUpFragmentCallback.stopProgressBar();
+					Toast.makeText(getActivity(), "회원가입에 실패하였습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+				}
+			}).execute();
+		}
+	}
+
+	private void saveSessionInSharedPreference(int userId) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		if (sharedPreferences.getInt(Preferences.SESSION_ID, -1) == -1) {
+			sharedPreferences.edit().putInt(Preferences.SESSION_ID, userId).apply();
+		}
+	}
+
 	private void showWelcomeDialog() {
 		AlertDialogFragment alertDialogFragment = new AlertDialogFragment();
 		alertDialogFragment.setMessage(R.string.welcome_message_3);
@@ -89,7 +173,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 	public void onClick(View v) {
 		switch (v.getId()) {
 			case R.id.button_sign_up:
-				showWelcomeDialog();
+				uploadSignUpUserData();
 				break;
 		}
 	}
@@ -112,7 +196,6 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 
 	@Override
 	public void onClickPositiveButton() {
-		// do login
 		Intent intent = new Intent(getActivity(), MainActivity.class);
 		startActivity(intent);
 		getActivity().finish();
@@ -130,5 +213,9 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 
 	public interface SignUpFragmentCallback {
 		void onClickNavigationBackButton();
+
+		void startProgressBar();
+
+		void stopProgressBar();
 	}
 }

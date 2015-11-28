@@ -1,8 +1,10 @@
 package com.skku.se;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -14,7 +16,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.navercorp.volleyextensions.volleyer.Volleyer;
+import com.skku.se.JacksonClass.SectionContent;
+import com.skku.se.JacksonClass.SyllabusInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,8 +42,10 @@ public class LearningActivity extends AppCompatActivity {
 
 	private int mCurrentPageNumber = 0;
 	private JSONArray mLearningContentsList;
-	private String mSectionName;
-	private String mChapterName;
+
+	private int mSectionId;
+	private int mChapterId;
+	private int mLearningLevel;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,29 +58,82 @@ public class LearningActivity extends AppCompatActivity {
 
 		Intent intent = getIntent();
 		if (intent != null) {
-			mChapterName = intent.getStringExtra(MainActivity.CHAPTER_NAME);
-			mSectionName = intent.getStringExtra(MainActivity.SECTION_NAME);
+			mChapterId = intent.getIntExtra(MainActivity.CHAPTER_ID, 1);
+			mSectionId = intent.getIntExtra(MainActivity.SECTION_ID, 1);
+			mLearningLevel = intent.getIntExtra(MainActivity.LEARNING_LEVEL, 1);
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
 		}
 
-		configureToolbar();
-		configureFragmentViewPager();
 		configurePageControlButtons();
+		downloadCurrentSectionLearningContents();
+		downloadSectionList();
 	}
 
-	private void configureToolbar() {
+	private void downloadCurrentSectionLearningContents() {
+		Volleyer.volleyer()
+				.get(getResources().getString(R.string.root_url) + "chapters/" + mChapterId + "/levels/" + mLearningLevel + "/sections/" + mSectionId)
+				.withTargetClass(SectionContent.class).withListener(new Response.Listener<SectionContent>() {
+			@Override
+			public void onResponse(SectionContent response) {
+				configureToolbar(response.sectionTitle, response.chapterTitle);
+				configureFragmentViewPager(response);
+			}
+		}).withErrorListener(new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+
+			}
+		}).execute();
+	}
+
+	private void downloadSectionList() {
+		Volleyer.volleyer().get(getResources().getString(R.string.root_url) +
+				"chapters/" +
+				mChapterId +
+				"/levels/" +
+				mLearningLevel +
+				"/sections").withTargetClass(SyllabusInfo.class).withListener(new Response.Listener<SyllabusInfo>() {
+			@Override
+			public void onResponse(SyllabusInfo response) {
+
+			}
+		}).withErrorListener(new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+
+			}
+		}).execute();
+	}
+
+	private void uploadCurrentLearningSection() {
+
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+	}
+
+	private void configureToolbar(String sectionTitle, String chapterTitle) {
 		mToolbar = (Toolbar) findViewById(R.id.toolbar_learning);
-		mToolbar.setTitle(mSectionName);
-		mToolbar.setSubtitle(mChapterName);
+		mToolbar.setTitle(sectionTitle);
+		mToolbar.setSubtitle(chapterTitle);
+		mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
+		mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
 	}
 
-	private void configureFragmentViewPager() {
+	private void configureFragmentViewPager(SectionContent sectionContent) {
 		mLearningFragmentViewPager = (NoSwipeViewpager) findViewById(R.id.viewPager_learning);
 		mLearningFragmentViewPager.setPagingEnabled(false);
-		mLearningFragmentPagerAdapter = new LearningFragmentPagerAdapter(getSupportFragmentManager(), mLearningContentsList);
+		mLearningFragmentPagerAdapter = new LearningFragmentPagerAdapter(getSupportFragmentManager(), sectionContent);
 
 		mLearningFragmentViewPager.setAdapter(mLearningFragmentPagerAdapter);
 
@@ -85,6 +150,18 @@ public class LearningActivity extends AppCompatActivity {
 					mPreviousButton.setVisibility(View.INVISIBLE);
 				} else {
 					mPreviousButton.setVisibility(View.VISIBLE);
+				}
+
+				switch (position) {
+					case 0:
+						mPreviousButton.setVisibility(View.INVISIBLE);
+						break;
+					case 1:
+
+						break;
+					case 3:
+						mNextButton.setText(R.string.next_section);
+						break;
 				}
 			}
 
@@ -119,131 +196,25 @@ public class LearningActivity extends AppCompatActivity {
 	}
 
 	public static class LearningFragmentPagerAdapter extends FragmentStatePagerAdapter {
-		private JSONArray mLearningContentsList;
+		private SectionContent mSectionContent;
 
-		public LearningFragmentPagerAdapter(FragmentManager fragmentManager, JSONArray learningContentsList) {
+		public LearningFragmentPagerAdapter(FragmentManager fragmentManager, SectionContent sectionContent) {
 			super(fragmentManager);
-			mLearningContentsList = learningContentsList;
+			mSectionContent = sectionContent;
 		}
 
 		@Override
 		public int getCount() {
-			return mLearningContentsList.length();
+			return 3;
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			JSONObject singleLearningContents = mLearningContentsList.optJSONObject(position);
-			return LearningFragment.newInstance(singleLearningContents.optInt("pageType"), singleLearningContents.toString());
-		}
-	}
-
-	public static class LearningFragment extends Fragment {
-		private static final String PAGE_TYPE = "page_type";
-		private static final String PAGE_LEARNING_CONTENTS = "page_contents";
-		private static final int LEARNING_TEMPLATE_ONE = 1;
-		private static final int LEARNING_TEMPLATE_TWO = 2;
-		private static final int LEARNING_TEMPLATE_THREE = 3;
-
-		public int mPageType;
-		public JSONObject mPageLearningContents;
-
-		/**
-		 * Create a new instance of CountingFragment, providing "num"
-		 * as an argument.
-		 */
-		public static LearningFragment newInstance(int pageType, String pageLearningContents) {
-			LearningFragment learningFragment = new LearningFragment();
-			Bundle args = new Bundle();
-			args.putInt(PAGE_TYPE, pageType);
-			args.putString(PAGE_LEARNING_CONTENTS, pageLearningContents);
-			learningFragment.setArguments(args);
-			return learningFragment;
-		}
-
-		/**
-		 * When creating, retrieve this instance's number from its arguments.
-		 */
-		@Override
-		public void onCreate(Bundle savedInstanceState) {
-			super.onCreate(savedInstanceState);
-			mPageType = getArguments() != null ? getArguments().getInt(PAGE_TYPE) : 1;
-			String pageLearningContents = getArguments() != null ? getArguments().getString(PAGE_LEARNING_CONTENTS) : "";
-
-			try {
-				mPageLearningContents = new JSONObject(pageLearningContents);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-
-		/**
-		 * The Fragment's UI is just a simple text view showing its
-		 * instance number.
-		 */
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-			View templateView;
-			switch (mPageType) {
-				case LEARNING_TEMPLATE_ONE:
-					templateView = inflater.inflate(R.layout.fragment_learning_template_one, container, false);
-					configureLearningTemplateOneView(templateView);
-					break;
-				case LEARNING_TEMPLATE_TWO:
-					templateView = inflater.inflate(R.layout.fragment_learning_template_two, container, false);
-					break;
-				case LEARNING_TEMPLATE_THREE:
-					templateView = inflater.inflate(R.layout.fragment_learning_template_three, container, false);
-					break;
-				default:
-					templateView = inflater.inflate(R.layout.fragment_learning_template_one, container, false);
-					break;
-			}
-			return templateView;
-		}
-
-		@Override
-		public void onActivityCreated(Bundle savedInstanceState) {
-			super.onActivityCreated(savedInstanceState);
-		}
-
-		private void configureLearningTemplateOneView(View templateView) {
-			TextView learningContentsTextView = (TextView) templateView.findViewById(R.id.textView_learning_contents);
-			learningContentsTextView.setText(mPageLearningContents.optString("pageInfo") + mPageLearningContents.optInt("subSectionNumber"));
-		}
-
-		private void configureLearningTemplateTwoView(View templateView) {
-
-		}
-
-		private void configureLearningTemplateThreeView(View templateView) {
-			TextView practicalProblemTextView = (TextView) templateView.findViewById(R.id.textView_practical_problem);
-			TextView hintCodeTextView = (TextView) templateView.findViewById(R.id.textView_hint_code);
-			Button copyCodeButton = (Button) templateView.findViewById(R.id.button_copy);
-			WebView practicalWebView = (WebView) templateView.findViewById(R.id.webView_practical);
-
-			// 실습창을 위한 webview
-			practicalWebView.loadUrl("http://cpp.sh/");
-			practicalWebView.getSettings().setJavaScriptEnabled(true);
-			practicalWebView.setVerticalScrollBarEnabled(true);
-		}
-
-		@Override
-		public void onViewCreated(View templateView, Bundle savedInstanceState) {
-			super.onViewCreated(templateView, savedInstanceState);
-			switch (mPageType) {
-				case LEARNING_TEMPLATE_ONE:
-					configureLearningTemplateOneView(templateView);
-					break;
-				case LEARNING_TEMPLATE_TWO:
-					configureLearningTemplateTwoView(templateView);
-					break;
-				case LEARNING_TEMPLATE_THREE:
-					configureLearningTemplateThreeView(templateView);
-					break;
-				default:
-					break;
-			}
+			Bundle bundle = new Bundle();
+			bundle.putInt("chapterId", mSectionContent.chapterId);
+			bundle.putInt("level", mSectionContent.level);
+			bundle.putInt("sectionId", mSectionContent.sectionId);
+			return LearningFragment.newInstance(position + 1, bundle);
 		}
 	}
 }

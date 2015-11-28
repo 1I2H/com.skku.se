@@ -5,12 +5,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.ProgressBar;
 
 public class LoginActivity extends AppCompatActivity implements SignInFragment.SignInFragmentCallback, SignUpFragment.SignUpFragmentCallback {
 	private static final String TAG = "LoginActivity";
 
 	private NoSwipeViewpager mNoSwipeViewpager;
 	private LoginFragmentPagerAdapter mLoginFragmentPagerAdapter;
+
+	private ProgressBar mProgressBar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +25,13 @@ public class LoginActivity extends AppCompatActivity implements SignInFragment.S
 		mLoginFragmentPagerAdapter = new LoginFragmentPagerAdapter(getSupportFragmentManager());
 		mNoSwipeViewpager.setAdapter(mLoginFragmentPagerAdapter);
 		mNoSwipeViewpager.setPagingEnabled(false);
+
+		initProgressBar();
+	}
+
+	private void initProgressBar() {
+		mProgressBar = (ProgressBar) findViewById(R.id.progressBar_login);
+		mProgressBar.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -61,5 +72,15 @@ public class LoginActivity extends AppCompatActivity implements SignInFragment.S
 				return SignUpFragment.newInstance();
 			}
 		}
+	}
+
+	@Override
+	public void startProgressBar() {
+		mProgressBar.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void stopProgressBar() {
+		mProgressBar.setVisibility(View.GONE);
 	}
 }

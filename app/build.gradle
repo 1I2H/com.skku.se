@@ -17,6 +17,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
 }
 
 dependencies {
@@ -26,4 +30,5 @@ dependencies {
     compile 'com.android.support:design:23.1.0'
     compile 'com.github.lzyzsd:circleprogress:1.1.0@aar'
     compile 'com.navercorp.volleyextensions:volleyer:2.0.+'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.6.+'
 }

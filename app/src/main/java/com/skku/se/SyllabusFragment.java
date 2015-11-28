@@ -1,42 +1,51 @@
 package com.skku.se;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.navercorp.volleyextensions.volleyer.Volleyer;
+import com.skku.se.JacksonClass.AbstractSectionInfo;
+import com.skku.se.JacksonClass.SyllabusInfo;
 
 public class SyllabusFragment extends Fragment {
-	// TODO: Rename parameter arguments, choose names that match
-	// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-	private static final String ARG_PARAM_CHAPTER_NAME = "chapter_name";
-	private static final String ARG_PARAM_CHAPTER_NUMBER = "chapter_number";
+	private static final String TAG = "SyllabusFragment";
 
-	private String mChapterTitle;
-	private int mChapterNumber;
+	private static final String ARG_PARAM_CHAPTER_ID = "chapter_id";
+	private static final String ARG_PARAM_LEARNING_LEVEL = "learning_level";
+
+	private LinearLayout mSyllabusLinearLayout;
+	private Toolbar mToolbar;
+
+	private int mChapterId;
+	private int mLearningLevel;
 
 	private SyllabusFragmentCallback mSyllabusFragmentCallback;
 
 	/**
 	 * Fragment 생성하기 위한 static 메소드
 	 *
-	 * @param chapterTitle  chapter 제목
-	 * @param chapterNumber chapter 번호
+	 * @param chapterId chapter 아이디
+	 * @param level     학습 레벨
 	 * @return A new instance of fragment SyllabusFragment.
 	 */
-	// TODO: Rename and change types and number of parameters
-	public static SyllabusFragment newInstance(String chapterTitle, int chapterNumber) {
+	public static SyllabusFragment newInstance(int chapterId, int level) {
 		SyllabusFragment fragment = new SyllabusFragment();
 		Bundle args = new Bundle();
-		args.putString(ARG_PARAM_CHAPTER_NAME, chapterTitle);
-		args.putInt(ARG_PARAM_CHAPTER_NUMBER, chapterNumber);
+		args.putInt(ARG_PARAM_CHAPTER_ID, chapterId);
+		args.putInt(ARG_PARAM_LEARNING_LEVEL, level);
 		fragment.setArguments(args);
 		return fragment;
 	}
@@ -49,8 +58,8 @@ public class SyllabusFragment extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (getArguments() != null) {
-			mChapterTitle = getArguments().getString(ARG_PARAM_CHAPTER_NAME);
-			mChapterNumber = getArguments().getInt(ARG_PARAM_CHAPTER_NUMBER);
+			mChapterId = getArguments().getInt(ARG_PARAM_CHAPTER_ID);
+			mLearningLevel = getArguments().getInt(ARG_PARAM_LEARNING_LEVEL);
 		}
 	}
 
@@ -70,104 +79,71 @@ public class SyllabusFragment extends Fragment {
 			getActivity().getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
 		}
 
-		LinearLayout syllabusLinearLayout = (LinearLayout) view.findViewById(R.id.linearLayout_syllabus);
+		mSyllabusLinearLayout = (LinearLayout) view.findViewById(R.id.linearLayout_syllabus);
 
-		// TODO change the hard-coded string
-		String[] syllabus;
-		if (mChapterNumber == MainActivity.STRUCTURE_CHAPTER_NUMBER) {
-			String[] structureSyllabus = {"기본 개념 정의 및 이해", "구조체 선언 및 초기화", "구조체 member 접근", "구조체 포인터", "함수와 할당"};
-			syllabus = structureSyllabus;
-		} else {
-			String[] otherSyllabus = {""};
-			syllabus = otherSyllabus;
-		}
+		downloadSyllabusContent(mChapterId, mLearningLevel);
+	}
 
-		for (int i = 0; i < syllabus.length; i++) {
-			View sectionRowView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_section_row, syllabusLinearLayout, false);
+	private void configureSectionRow(SyllabusInfo syllabusInfo) {
+		for (int i = 0; i < syllabusInfo.sections.size(); i++) {
+			final AbstractSectionInfo abstractSectionInfo = syllabusInfo.sections.get(i);
+
+			View sectionRowView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_section_row, mSyllabusLinearLayout, false);
 
 			TextView sectionNumberIconTextView = (TextView) sectionRowView.findViewById(R.id.textView_section_number_icon);
-			sectionNumberIconTextView.setText("" + (i + 1));
-
-			final int sectionNumber = i + 1;
+			sectionNumberIconTextView.setText(String.valueOf(abstractSectionInfo.sectionId));
 
 			TextView sectionNameTextView = (TextView) sectionRowView.findViewById(R.id.textView_section_name);
 
-			sectionNameTextView.setText(syllabus[i]);
+			sectionNameTextView.setText(abstractSectionInfo.sectionTitle);
 
 			sectionRowView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					showLearningContents(mChapterNumber, sectionNumber);
+					mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.sectionId, mLearningLevel);
 				}
 			});
 
-			syllabusLinearLayout.addView(sectionRowView);
+			mSyllabusLinearLayout.addView(sectionRowView);
 		}
 	}
 
 	private void configureToolbar(View rootView) {
-		Toolbar mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar_syllabus);
+		mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar_syllabus);
 		mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
 		mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 					getActivity().getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
+				} else {
+					getActivity().getWindow().setStatusBarColor(getActivity().getColor(android.R.color.transparent));
 				}
 				mSyllabusFragmentCallback.onClickNavigationBackButton();
 			}
 		});
-		mToolbar.setTitle(mChapterTitle);
 	}
 
-	private void showLearningContents(int chapterNumber, int sectionNumber) {
-		String[] names = downloadSectionLearningContents(chapterNumber, sectionNumber);
-		callLearningActivity(names[0], names[1]);
-	}
 
-	private String[] downloadSectionLearningContents(int chapterNumber, int sectionNumber) {
-		// TODO get learning contents of @param sectionNumber of @param chapterNumber from the server
-
-		// names[0] is for chapter name and names[1] is for section name
-		String[] names = new String[2];
-
-		if (chapterNumber == 1) {
-			names[0] = "파일 입/출력";
-		} else if (chapterNumber == 2) {
-			names[0] = "구조체";
-		} else {
-			names[0] = "컴파일 과정";
-		}
-
-		switch (sectionNumber) {
-			case 1:
-				names[1] = "Section_1";
-				break;
-			case 2:
-				names[1] = "Section_2";
-				break;
-			case 3:
-				names[1] = "Section_3";
-				break;
-			case 4:
-				names[1] = "Section_4";
-				break;
-			case 5:
-				names[1] = "Section_5";
-				break;
-			default:
-				names[1] = "Section_X";
-				break;
-		}
-
-		return names;
-	}
-
-	private void callLearningActivity(String chapterName, String sectionName) {
-		Intent intent = new Intent(getActivity(), LearningActivity.class);
-		intent.putExtra(MainActivity.CHAPTER_NAME, chapterName);
-		intent.putExtra(MainActivity.SECTION_NAME, sectionName);
-		startActivity(intent);
+	private void downloadSyllabusContent(int chapterId, int level) {
+		Volleyer.volleyer().get(getResources().getString(R.string.root_url) + "chapters/" + chapterId + "/levels/" + level + "/sections")
+				.withTargetClass(SyllabusInfo.class).withListener(new Response.Listener<SyllabusInfo>() {
+			@Override
+			public void onResponse(SyllabusInfo response) {
+				mToolbar.setTitle(response.chapterTitle);
+				if (mLearningLevel == 1) {
+					mToolbar.setSubtitle("Beginner class");
+				} else {
+					mToolbar.setSubtitle("Intermediate class");
+				}
+				configureSectionRow(response);
+			}
+		}).withErrorListener(new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Toast.makeText(getActivity(), "정보 가져오기를 실패하였습니다.", Toast.LENGTH_SHORT).show();
+			}
+		}).execute();
 	}
 
 	@Override
@@ -188,5 +164,7 @@ public class SyllabusFragment extends Fragment {
 
 	public interface SyllabusFragmentCallback {
 		void onClickNavigationBackButton();
+
+		void onClickSectionButton(int chapterId, int sectionId, int learningLevel);
 	}
 }
