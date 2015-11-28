@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		seeSectionsChapterButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				showSyllabus(chapterId, learningLevel);
+				showSyllabus(chapterId, currentSection, learningLevel);
 			}
 		});
 
@@ -344,8 +344,8 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		callLearningActivity(chapterId, sectionId, learningLevel);
 	}
 
-	private void showSyllabus(int chapterId, int level) {
-		SyllabusFragment syllabusFragment = SyllabusFragment.newInstance(chapterId, level);
+	private void showSyllabus(int chapterId, int currentSectionId, int level) {
+		SyllabusFragment syllabusFragment = SyllabusFragment.newInstance(chapterId, currentSectionId, level);
 		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 		fragmentTransaction.replace(android.R.id.content, syllabusFragment);
 		fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);

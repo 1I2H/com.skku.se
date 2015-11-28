@@ -5,12 +5,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,12 +23,14 @@ public class SyllabusFragment extends Fragment {
 
 	private static final String ARG_PARAM_CHAPTER_ID = "chapter_id";
 	private static final String ARG_PARAM_LEARNING_LEVEL = "learning_level";
+	private static final String ARG_PARAM_CURRENT_SECTION = "current_section";
 
 	private LinearLayout mSyllabusLinearLayout;
 	private Toolbar mToolbar;
 
 	private int mChapterId;
 	private int mLearningLevel;
+	private int mCurrentSection;
 
 	private SyllabusFragmentCallback mSyllabusFragmentCallback;
 
@@ -38,13 +38,15 @@ public class SyllabusFragment extends Fragment {
 	 * Fragment 생성하기 위한 static 메소드
 	 *
 	 * @param chapterId chapter 아이디
+	 * @param currentSection 직전까지 진행한 섹션
 	 * @param level     학습 레벨
 	 * @return A new instance of fragment SyllabusFragment.
 	 */
-	public static SyllabusFragment newInstance(int chapterId, int level) {
+	public static SyllabusFragment newInstance(int chapterId, int currentSection, int level) {
 		SyllabusFragment fragment = new SyllabusFragment();
 		Bundle args = new Bundle();
 		args.putInt(ARG_PARAM_CHAPTER_ID, chapterId);
+		args.putInt(ARG_PARAM_CURRENT_SECTION, currentSection);
 		args.putInt(ARG_PARAM_LEARNING_LEVEL, level);
 		fragment.setArguments(args);
 		return fragment;
@@ -60,6 +62,7 @@ public class SyllabusFragment extends Fragment {
 		if (getArguments() != null) {
 			mChapterId = getArguments().getInt(ARG_PARAM_CHAPTER_ID);
 			mLearningLevel = getArguments().getInt(ARG_PARAM_LEARNING_LEVEL);
+			mCurrentSection = getArguments().getInt(ARG_PARAM_CURRENT_SECTION);
 		}
 	}
 
@@ -84,28 +87,39 @@ public class SyllabusFragment extends Fragment {
 		downloadSyllabusContent(mChapterId, mLearningLevel);
 	}
 
-	private void configureSectionRow(SyllabusInfo syllabusInfo) {
+	private void configureSectionList(SyllabusInfo syllabusInfo) {
 		for (int i = 0; i < syllabusInfo.sections.size(); i++) {
-			final AbstractSectionInfo abstractSectionInfo = syllabusInfo.sections.get(i);
+			AbstractSectionInfo abstractSectionInfo = syllabusInfo.sections.get(i);
+			View sectionRow = inflateSectionRow();
+			configureSectionRow(sectionRow, abstractSectionInfo, i);
 
-			View sectionRowView = LayoutInflater.from(getActivity()).inflate(R.layout.layout_section_row, mSyllabusLinearLayout, false);
-
-			TextView sectionNumberIconTextView = (TextView) sectionRowView.findViewById(R.id.textView_section_number_icon);
-			sectionNumberIconTextView.setText(String.valueOf(abstractSectionInfo.sectionId));
-
-			TextView sectionNameTextView = (TextView) sectionRowView.findViewById(R.id.textView_section_name);
-
-			sectionNameTextView.setText(abstractSectionInfo.sectionTitle);
-
-			sectionRowView.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.sectionId, mLearningLevel);
-				}
-			});
-
-			mSyllabusLinearLayout.addView(sectionRowView);
+			mSyllabusLinearLayout.addView(sectionRow);
 		}
+	}
+
+	private View inflateSectionRow() {
+		return LayoutInflater.from(getActivity()).inflate(R.layout.layout_section_row, mSyllabusLinearLayout, false);
+	}
+
+	private void configureSectionRow(View sectionRow, final AbstractSectionInfo abstractSectionInfo, int index) {
+		TextView sectionNumberIconTextView = (TextView) sectionRow.findViewById(R.id.textView_section_number_icon);
+		sectionNumberIconTextView.setText(String.valueOf(abstractSectionInfo.sectionId));
+
+		TextView sectionNameTextView = (TextView) sectionRow.findViewById(R.id.textView_section_name);
+		sectionNameTextView.setText(abstractSectionInfo.sectionTitle);
+
+		int sectionId = index + 1;
+		if (sectionId < mCurrentSection && mCurrentSection > 0) {
+			TextView sectionDoneTextView = (TextView) sectionRow.findViewById(R.id.textView_section_done_icon);
+			sectionDoneTextView.setVisibility(View.VISIBLE);
+		}
+
+		sectionRow.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.sectionId, mLearningLevel);
+			}
+		});
 	}
 
 	private void configureToolbar(View rootView) {
@@ -136,7 +150,7 @@ public class SyllabusFragment extends Fragment {
 				} else {
 					mToolbar.setSubtitle("Intermediate class");
 				}
-				configureSectionRow(response);
+				configureSectionList(response);
 			}
 		}).withErrorListener(new Response.ErrorListener() {
 			@Override
