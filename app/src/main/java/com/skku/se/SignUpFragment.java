@@ -36,7 +36,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 	private static final String TAG = "SignUpFragment";
 
 	private Toolbar mToolbar;
-	private EditText mSignUpIdEditText;
+	private EditText mSignUpUserIdEditText;
 	private EditText mSignUpPasswordEditText;
 	private Button mSignUpButton;
 
@@ -74,7 +74,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 		mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar_sign_up);
 		mToolbar.setTitle(R.string.sign_up);
 		mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
-		mSignUpIdEditText = (EditText) rootView.findViewById(R.id.editText_id_sign_up);
+		mSignUpUserIdEditText = (EditText) rootView.findViewById(R.id.editText_id_sign_up);
 		mSignUpPasswordEditText = (EditText) rootView.findViewById(R.id.editText_password_sign_up);
 		mSignUpButton = (Button) rootView.findViewById(R.id.button_sign_up);
 	}
@@ -90,7 +90,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 	}
 
 	private boolean isUserInputDataValid() {
-		String emailAddress = mSignUpIdEditText.getText().toString();
+		String emailAddress = mSignUpUserIdEditText.getText().toString();
 		if (isValidEmail(emailAddress)) {
 			return !emailAddress.isEmpty() && !mSignUpPasswordEditText.getText().toString().isEmpty();
 		} else {
@@ -102,7 +102,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 	private JSONObject makeJSONTypeUserInputData() {
 		try {
 			JSONObject userInputData = new JSONObject();
-			userInputData.put("email", mSignUpIdEditText.getText().toString());
+			userInputData.put("email", mSignUpUserIdEditText.getText().toString());
 			userInputData.put("password", mSignUpPasswordEditText.getText().toString());
 
 			return userInputData;
@@ -136,6 +136,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 					mSignUpFragmentCallback.stopProgressBar();
 					try {
 						saveSessionInSharedPreference((new JSONObject(response).optInt("userId")));
+						saveUserIDAndPasswordInSharedPreference();
 						Log.d(TAG, response.toString());
 						showWelcomeDialog();
 					} catch (JSONException e) {
@@ -156,6 +157,15 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		if (sharedPreferences.getInt(Preferences.SESSION_ID, -1) == -1) {
 			sharedPreferences.edit().putInt(Preferences.SESSION_ID, userId).apply();
+		}
+	}
+
+	private void saveUserIDAndPasswordInSharedPreference() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		if (sharedPreferences.getString(Preferences.USER_ID, "").length() == 0 &&
+				sharedPreferences.getString(Preferences.USER_PASSWORD, "").length() == 0) {
+			sharedPreferences.edit().putString(Preferences.USER_ID, mSignUpUserIdEditText.getText().toString()).apply();
+			sharedPreferences.edit().putString(Preferences.USER_PASSWORD, mSignUpPasswordEditText.getText().toString()).apply();
 		}
 	}
 

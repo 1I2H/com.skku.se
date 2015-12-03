@@ -1,8 +1,10 @@
 package com.skku.se;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -21,6 +23,8 @@ import com.skku.se.JacksonClass.SectionContent;
 import com.skku.se.JacksonClass.SyllabusInfo;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class LearningActivity extends AppCompatActivity implements AlertDialogFragment.AlertDialogFragmentCallback {
 	private static final String TAG = "LearningActivity";
@@ -42,6 +46,8 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 	private int mLearningLevel;
 
 	private int mTotalSectionCount = 0;
+
+	private boolean mIsWholeSectionComplete = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +105,11 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 		startProgressBar();
 	}
 
+	private String restoreSessionFromSharedPreferences() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return String.valueOf(sharedPreferences.getInt(Preferences.SESSION_ID, -1));
+	}
+
 	private void downloadSectionList() {
 		Volleyer.volleyer().get(getResources().getString(R.string.root_url) +
 				"chapters/" +
@@ -111,10 +122,6 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 				mTotalSectionCount = response.sections.size();
 			}
 		}).execute();
-	}
-
-	private void uploadCurrentLearningSection() {
-		//TODO upload current learning section data to the server
 	}
 
 	@Override
@@ -143,7 +150,6 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 
 	@Override
 	public void onClickPositiveButton() {
-		uploadCurrentLearningSection();
 		Toast.makeText(LearningActivity.this, "학습 진행 정보가 저장되었습니다.", Toast.LENGTH_SHORT).show();
 		finish();
 	}
@@ -180,6 +186,7 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 	}
 
 	private void showNextSection() {
+		mIsWholeSectionComplete = false;
 		mSectionId += 1;
 		downloadCurrentSectionLearningContents();
 	}
@@ -219,8 +226,7 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 							mNextButton.setOnClickListener(new View.OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									refresh();
-									showNextSection();
+									uploadLearningProgressData();
 								}
 							});
 						} else {
@@ -228,7 +234,8 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 							mNextButton.setOnClickListener(new View.OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									showCompleteLearningDialog();
+									mIsWholeSectionComplete = true;
+									uploadLearningProgressData();
 								}
 							});
 						}
@@ -252,6 +259,42 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 		mNextButton = (Button) findViewById(R.id.button_next_page);
 		mNextButton.setText(R.string.next_page);
 		mNextButton.setOnClickListener(mNextPageNavigationListener);
+	}
+
+	private String makeJSONTypeLearningProgressData() {
+		try {
+			// TODO fix the key name of the section id
+			JSONObject learningProgressData = new JSONObject();
+			learningProgressData.put("section_id", mSectionId);
+			learningProgressData.put("level", mLearningLevel);
+
+			return learningProgressData.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private void uploadLearningProgressData() {
+		Volleyer.volleyer().put(getResources().getString(R.string.root_url) + "user/progress-section")
+				.addHeader("Authorization", restoreSessionFromSharedPreferences()).addHeader("Content-Type", "application/json")
+				.withBody(makeJSONTypeLearningProgressData()).withListener(new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				if (!mIsWholeSectionComplete) {
+					Toast.makeText(LearningActivity.this, "학습 진도를 업로드 안정적으로 완료하였습니다.", Toast.LENGTH_SHORT).show();
+					refresh();
+					showNextSection();
+				} else {
+					showCompleteLearningDialog();
+				}
+			}
+		}).withErrorListener(new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Toast.makeText(LearningActivity.this, "학습 진도를 업로드하는데 문제가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+			}
+		}).execute();
 	}
 
 	private View.OnClickListener mPreviousPageNavigationListener = new View.OnClickListener() {

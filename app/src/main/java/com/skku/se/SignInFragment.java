@@ -34,6 +34,8 @@ import java.util.regex.Pattern;
 public class SignInFragment extends Fragment implements View.OnClickListener {
 	private static final String TAG = "SignInFragment";
 
+	private SharedPreferences mSharedPreferences;
+	
 	private EditText mUserIdEditText;
 	private EditText mUserPasswordEditText;
 	private Button mSignInButton;
@@ -65,8 +67,11 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		initViewInstance(view);
 		setViewListeners();
+
+		tryAutoLogin();
 	}
 
 	private void initViewInstance(View rootView) {
@@ -81,12 +86,32 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 		mSignUpButton.setOnClickListener(this);
 	}
 
+	private boolean restoreUserIDAndPassword() {
+		String userId;
+		String userPassword;
+
+		if ((userId = mSharedPreferences.getString(Preferences.USER_ID, "")).length() != 0 &&
+				(userPassword = mSharedPreferences.getString(Preferences.USER_PASSWORD, "")).length() != 0) {
+			mUserIdEditText.setText(userId);
+			mUserPasswordEditText.setText(userPassword);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private void tryAutoLogin() {
+		if (restoreUserIDAndPassword()) {
+			inquireUserInfoFromServer();
+		}
+	}
+
 	private boolean isUserInputDataValid() {
 		String emailAddress = mUserIdEditText.getText().toString();
 		if (isValidEmail(emailAddress)) {
 			return !emailAddress.isEmpty() && !mUserPasswordEditText.getText().toString().isEmpty();
 		} else {
-			Toast.makeText(getActivity(), "잘 못된 이메일 형식입니다.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), "잘못된 이메일 형식입니다.", Toast.LENGTH_SHORT).show();
 			return false;
 		}
 	}
@@ -144,9 +169,16 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 	}
 
 	private void saveSessionInSharedPreference(int userId) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		if (sharedPreferences.getInt(Preferences.SESSION_ID, -1) == -1) {
-			sharedPreferences.edit().putInt(Preferences.SESSION_ID, userId).apply();
+		if (mSharedPreferences.getInt(Preferences.SESSION_ID, -1) == -1) {
+			mSharedPreferences.edit().putInt(Preferences.SESSION_ID, userId).apply();
+		}
+	}
+
+	private void saveUserIDAndPasswordInSharedPreference() {
+		if (mSharedPreferences.getString(Preferences.USER_ID, "").length() == 0 &&
+				mSharedPreferences.getString(Preferences.USER_PASSWORD, "").length() == 0) {
+			mSharedPreferences.edit().putString(Preferences.USER_ID, mUserIdEditText.getText().toString()).apply();
+			mSharedPreferences.edit().putString(Preferences.USER_PASSWORD, mUserPasswordEditText.getText().toString()).apply();
 		}
 	}
 
@@ -161,6 +193,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 		switch (v.getId()) {
 			case R.id.button_sign_in:
 				inquireUserInfoFromServer();
+				saveUserIDAndPasswordInSharedPreference();
 				break;
 			case R.id.button_go_sign_up_page:
 				mSignInFragmentCallback.onClickGoSignUpPageButton();

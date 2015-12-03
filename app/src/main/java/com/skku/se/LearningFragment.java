@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,7 +74,6 @@ public class LearningFragment extends Fragment {
 		switch (mPageType) {
 			case LEARNING_TEMPLATE_ONE:
 				templateView = inflater.inflate(R.layout.fragment_learning_template_one, container, false);
-				configureLearningTemplateOneView(templateView);
 				break;
 			case LEARNING_TEMPLATE_TWO:
 				templateView = inflater.inflate(R.layout.fragment_learning_template_two, container, false);
@@ -99,6 +99,9 @@ public class LearningFragment extends Fragment {
 	}
 
 	private void configureLearningTemplateTwoView(View templateView) {
+		TextView problemTextView = (TextView) templateView.findViewById(R.id.textView_problem);
+		RadioGroup problemSelectionRadioGroup = (RadioGroup) templateView.findViewById(R.id.radioGroup_problem);
+
 		final EditText askQuestionEditText = (EditText) templateView.findViewById(R.id.editText_ask);
 		Button askQuestionButton = (Button) templateView.findViewById(R.id.button_ask);
 

@@ -27,24 +27,19 @@ import com.navercorp.volleyextensions.volleyer.Volleyer;
 import com.skku.se.JacksonClass.AbstractChapterInfo;
 import com.skku.se.JacksonClass.MainPageContents;
 import com.skku.se.JacksonClass.QnAInfo;
-import com.skku.se.JacksonClass.SyllabusInfo;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements SyllabusFragment.SyllabusFragmentCallback,
 		AlertDialogFragment.AlertDialogFragmentCallback {
-	private static final String TAG = "MainActivity";
-
-	public static final int FILE_INPUT_OUTPUT_CHAPTER_NUMBER = 1;
-	public static final int STRUCTURE_CHAPTER_NUMBER = 2;
-	public static final int COMPILE_FLOW_CHAPTER_NUMBER = 3;
-
 	public static final String CHAPTER_ID = "chapter_id";
 	public static final String SECTION_ID = "section_id";
 	public static final String LEARNING_LEVEL = "learning_level";
-
+	private static final String TAG = "MainActivity";
 	private LinearLayout mLearningChapterListLinearLayout;
 	private LinearLayout mQnALinearLayout;
 
@@ -60,6 +55,17 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 
 	private String mRootUrl;
 	private int mCurrentChapterIndex = 0;
+	private Response.Listener<MainPageContents> downloadMainPageContentListener = new Response.Listener<MainPageContents>() {
+		@Override
+		public void onResponse(MainPageContents response) {
+			stopProgressBar();
+			mAbstractChapterInfo = response.learningInfo;
+			mQnAInfo = response.qnA;
+
+			configureLearningList();
+			configureQnAList();
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,14 +85,6 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		mProgressBar.setVisibility(View.GONE);
 	}
 
-	private void startProgressBar() {
-		mProgressBar.setVisibility(View.VISIBLE);
-	}
-
-	private void stopProgressBar() {
-		mProgressBar.setVisibility(View.GONE);
-	}
-
 	private void downloadMainPageContent() {
 		startProgressBar();
 		Volleyer.volleyer().get(mRootUrl).addHeader("Authorization", restoreSessionFromSharedPreferences()).withTargetClass(MainPageContents.class)
@@ -99,22 +97,18 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		}).execute();
 	}
 
+	private void startProgressBar() {
+		mProgressBar.setVisibility(View.VISIBLE);
+	}
+
 	private String restoreSessionFromSharedPreferences() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		return String.valueOf(sharedPreferences.getInt(Preferences.SESSION_ID, -1));
 	}
 
-	private Response.Listener<MainPageContents> downloadMainPageContentListener = new Response.Listener<MainPageContents>() {
-		@Override
-		public void onResponse(MainPageContents response) {
-			stopProgressBar();
-			mAbstractChapterInfo = response.learningInfo;
-			mQnAInfo = response.qnA;
-
-			configureLearningList();
-			configureQnAList();
-		}
-	};
+	private void stopProgressBar() {
+		mProgressBar.setVisibility(View.GONE);
+	}
 
 	@Override
 	public void onBackPressed() {
@@ -122,8 +116,20 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
 			}
+		} else {
+			showApplicationTerminationDialog();
 		}
 		super.onBackPressed();
+	}
+
+	private void showApplicationTerminationDialog() {
+		AlertDialogFragment alertDialogFragment = new AlertDialogFragment();
+		alertDialogFragment.setDialogStyle(AlertDialogFragment.SIMPLE_STYLE);
+		alertDialogFragment.setMessage(R.string.are_you_sure_you_want_to_finish_the_app);
+		alertDialogFragment.setPositiveButtonText(R.string.yes);
+		alertDialogFragment.setNegativeButtonText(R.string.no);
+		alertDialogFragment.setNumberOfButtons(2);
+		alertDialogFragment.show(getSupportFragmentManager(), "application_termination_dialog");
 	}
 
 	private void configureLearningList() {
@@ -142,6 +148,26 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void configureQnAList() {
+		/* Q&A 목록 설정 */
+		mQnALinearLayout = (LinearLayout) findViewById(R.id.linearLayout_qna);
+
+		for (int i = 0; i < mQnAInfo.size(); i++) {
+			QnAInfo qnAContent = mQnAInfo.get(i);
+
+			View questionRow = inflateQnARow(true);
+			configureQnARow(questionRow, qnAContent.sectionName, qnAContent.question, qnAContent.questionDate, true);
+			mQnALinearLayout.addView(questionRow);
+
+			if (!qnAContent.answer.equals(null)) {
+				View answerRow;
+				answerRow = inflateQnARow(false);
+				configureQnARow(answerRow, qnAContent.sectionName, qnAContent.answer, qnAContent.answerDate, false);
+				mQnALinearLayout.addView(answerRow);
+			}
 		}
 	}
 
@@ -211,58 +237,6 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		});
 	}
 
-	private String configureLearningLevel(int level) {
-		if (level == 1) {
-			return "Beginner";
-		} else {
-			return "Intermediate";
-		}
-	}
-
-	private int configureLearningLevelIcon(int level) {
-		if (level == 1) {
-			return R.drawable.background_beginner_level_icon;
-		} else {
-			return R.drawable.background_intermediate_level_icon;
-		}
-	}
-
-	private boolean isNewStart(int sectionId) {
-		if (sectionId == 1) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private void showLearningLevelSelectionDialog() {
-		AlertDialogFragment alertDialogFragment = new AlertDialogFragment();
-		alertDialogFragment.setDialogStyle(AlertDialogFragment.RADIO_BUTTON_STYLE);
-		alertDialogFragment.setTitle(R.string.select_learning_level);
-		alertDialogFragment.setSelectionStringArray(R.array.learning_level_list);
-		alertDialogFragment.show(getSupportFragmentManager(), "alertDialog");
-	}
-
-	private void configureQnAList() {
-		/* Q&A 목록 설정 */
-		mQnALinearLayout = (LinearLayout) findViewById(R.id.linearLayout_qna);
-
-		for (int i = 0; i < mQnAInfo.size(); i++) {
-			QnAInfo qnAContent = mQnAInfo.get(i);
-
-			View questionRow = inflateQnARow(true);
-			configureQnARow(questionRow, qnAContent.sectionName, qnAContent.question, qnAContent.questionDate, true);
-			mQnALinearLayout.addView(questionRow);
-
-			if (!qnAContent.answer.equals(null)) {
-				View answerRow;
-				answerRow = inflateQnARow(false);
-				configureQnARow(answerRow, qnAContent.sectionName, qnAContent.answer, qnAContent.answerDate, false);
-				mQnALinearLayout.addView(answerRow);
-			}
-		}
-	}
-
 	private View inflateQnARow(boolean isQuestion) {
 		View qnARow = LayoutInflater.from(this).inflate(R.layout.layout_qna_row, mQnALinearLayout, false);
 		LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) qnARow.getLayoutParams();
@@ -293,6 +267,51 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		qnASectionNameTextView.setText(qnASectionName);
 	}
 
+	private String configureLearningLevel(int level) {
+		if (level == 1) {
+			return "Beginner";
+		} else {
+			return "Intermediate";
+		}
+	}
+
+	private int configureLearningLevelIcon(int level) {
+		if (level == 1) {
+			return R.drawable.background_beginner_level_icon;
+		} else {
+			return R.drawable.background_intermediate_level_icon;
+		}
+	}
+
+	private boolean isNewStart(int sectionId) {
+		if (sectionId == 1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private void showLearningContents(int chapterId, int sectionId, int learningLevel) {
+		callLearningActivity(chapterId, sectionId, learningLevel);
+	}
+
+	private void showSyllabus(int chapterId, int currentSectionId, int learningLevel) {
+		SyllabusFragment syllabusFragment = SyllabusFragment.newInstance(chapterId, currentSectionId, learningLevel);
+		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+		fragmentTransaction.replace(android.R.id.content, syllabusFragment);
+		fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+		fragmentTransaction.addToBackStack(null);
+		fragmentTransaction.commit();
+	}
+
+	private void showLearningLevelSelectionDialog() {
+		AlertDialogFragment alertDialogFragment = new AlertDialogFragment();
+		alertDialogFragment.setDialogStyle(AlertDialogFragment.RADIO_BUTTON_STYLE);
+		alertDialogFragment.setTitle(R.string.select_learning_level);
+		alertDialogFragment.setSelectionStringArray(R.array.learning_level_list);
+		alertDialogFragment.show(getSupportFragmentManager(), "learning_level_selection_dialog");
+	}
+
 	private String configureQnAIconText(boolean isQuestion) {
 		if (isQuestion) {
 			return "Q";
@@ -309,16 +328,12 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		}
 	}
 
-	private void updateLearningChapterView(int learningLevel, String progressDetail, int progress) {
-		mTempTextView.setText(configureLearningLevel(learningLevel));
-		mTempTextView.setBackgroundResource(configureLearningLevelIcon(learningLevel));
-		mTempChapterProgressTextView.setText(progressDetail);
-		mTempCircleProgress.setProgress(progress);
-		if (isNewStart(mAbstractChapterInfo.get(mCurrentChapterIndex).progressInfo.get(learningLevel - 1).progressSection)) {
-			mTempContinueChapterButton.setText(R.string.start_learning);
-		} else {
-			mTempContinueChapterButton.setText(R.string.continue_learning);
-		}
+	private void callLearningActivity(int chapterId, int sectionId, int learningLevel) {
+		Intent intent = new Intent(MainActivity.this, LearningActivity.class);
+		intent.putExtra(CHAPTER_ID, chapterId);
+		intent.putExtra(SECTION_ID, sectionId);
+		intent.putExtra(LEARNING_LEVEL, learningLevel);
+		startActivity(intent);
 	}
 
 	@Override
@@ -337,28 +352,13 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 	}
 
 	private void signOut() {
+		clearSharedPreference();
 		restartApplication();
 	}
 
-	private void showLearningContents(int chapterId, int sectionId, int learningLevel) {
-		callLearningActivity(chapterId, sectionId, learningLevel);
-	}
-
-	private void showSyllabus(int chapterId, int currentSectionId, int level) {
-		SyllabusFragment syllabusFragment = SyllabusFragment.newInstance(chapterId, currentSectionId, level);
-		FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-		fragmentTransaction.replace(android.R.id.content, syllabusFragment);
-		fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-		fragmentTransaction.addToBackStack(null);
-		fragmentTransaction.commit();
-	}
-
-	private void callLearningActivity(int chapterId, int sectionId, int learningLevel) {
-		Intent intent = new Intent(MainActivity.this, LearningActivity.class);
-		intent.putExtra(CHAPTER_ID, chapterId);
-		intent.putExtra(SECTION_ID, sectionId);
-		intent.putExtra(LEARNING_LEVEL, learningLevel);
-		startActivity(intent);
+	private void clearSharedPreference() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPreferences.edit().clear().commit();
 	}
 
 	private void restartApplication() {
@@ -374,14 +374,52 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 	}
 
 	@Override
-	public void onClickPositiveButton() {
-
+	public void onClickSectionButton(int chapterId, int sectionId, int learningLevel) {
+		showLearningContents(chapterId, sectionId, learningLevel);
 	}
 
 	@Override
-	public void onClickNegativeButton() {
-
+	public void onClickPositiveButton() {
+		uploadCurrentLearningLevelData();
 	}
+
+	private void uploadCurrentLearningLevelData() {
+		Volleyer.volleyer().put(mRootUrl + "user/current-section").addHeader("Authorization", restoreSessionFromSharedPreferences())
+				.addHeader("Content-Type", "application/json").withBody(makeJSONTypeCurrentLearningLevelData())
+				.withListener(new Response.Listener<String>() {
+					@Override
+					public void onResponse(String response) {
+						finish();
+					}
+				}).withErrorListener(new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Toast.makeText(MainActivity.this, "학습 데이터를 업로드를 실패하였습니다. 다시 한 번 앱을 종료해주세요.", Toast.LENGTH_SHORT).show();
+			}
+		}).execute();
+	}
+
+	private String makeJSONTypeCurrentLearningLevelData() {
+		try {
+			JSONObject currentLearningLevelData = new JSONObject();
+			JSONArray currentLevels = new JSONArray();
+			for (int i = 0; i < Preferences.LEARNING_CHAPTER_COUNT; i++) {
+				JSONObject tempObject = new JSONObject();
+				tempObject.put("chapter_id", mAbstractChapterInfo.get(i).chapterId);
+				tempObject.put("current_level", mAbstractChapterInfo.get(i).currentLevel);
+
+				currentLevels.put(tempObject);
+			}
+			currentLearningLevelData.put("current_levels", currentLevels);
+			return currentLearningLevelData.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public void onClickNegativeButton() {}
 
 	@Override
 	public void onClickSelectionButton(int index) {
@@ -390,11 +428,18 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		updateLearningChapterView(learningLevel,
 				abstractChapterInfo.progressInfo.get(index).progressDetail,
 				abstractChapterInfo.progressInfo.get(index).progressPercentage);
-		abstractChapterInfo.currentLevel = learningLevel;
+		mAbstractChapterInfo.get(mCurrentChapterIndex).currentLevel = learningLevel;
 	}
 
-	@Override
-	public void onClickSectionButton(int chapterId, int sectionId, int learningLevel) {
-		showLearningContents(chapterId, sectionId, learningLevel);
+	private void updateLearningChapterView(int learningLevel, String progressDetail, int progress) {
+		mTempTextView.setText(configureLearningLevel(learningLevel));
+		mTempTextView.setBackgroundResource(configureLearningLevelIcon(learningLevel));
+		mTempChapterProgressTextView.setText(progressDetail);
+		mTempCircleProgress.setProgress(progress);
+		if (isNewStart(mAbstractChapterInfo.get(mCurrentChapterIndex).progressInfo.get(learningLevel - 1).progressSection)) {
+			mTempContinueChapterButton.setText(R.string.start_learning);
+		} else {
+			mTempContinueChapterButton.setText(R.string.continue_learning);
+		}
 	}
 }

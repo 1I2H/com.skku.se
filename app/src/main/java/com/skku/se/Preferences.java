@@ -5,4 +5,9 @@ package com.skku.se;
  */
 public class Preferences {
 	public static final String SESSION_ID = "session_id";
+
+	public static final String USER_ID = "user_id";
+	public static final String USER_PASSWORD = "user_password";
+
+	public static final int LEARNING_CHAPTER_COUNT = 3;
 }

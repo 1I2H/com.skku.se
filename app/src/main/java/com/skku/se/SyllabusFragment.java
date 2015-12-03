@@ -37,9 +37,9 @@ public class SyllabusFragment extends Fragment {
 	/**
 	 * Fragment 생성하기 위한 static 메소드
 	 *
-	 * @param chapterId chapter 아이디
+	 * @param chapterId      chapter 아이디
 	 * @param currentSection 직전까지 진행한 섹션
-	 * @param level     학습 레벨
+	 * @param level          학습 레벨
 	 * @return A new instance of fragment SyllabusFragment.
 	 */
 	public static SyllabusFragment newInstance(int chapterId, int currentSection, int level) {
@@ -108,18 +108,35 @@ public class SyllabusFragment extends Fragment {
 		TextView sectionNameTextView = (TextView) sectionRow.findViewById(R.id.textView_section_name);
 		sectionNameTextView.setText(abstractSectionInfo.sectionTitle);
 
-		int sectionId = index + 1;
+		final int sectionId = index + 1;
+		// 이미 수강한 섹션들의 경
 		if (sectionId < mCurrentSection && mCurrentSection > 0) {
+			// 수강 완료되었다고 표시
 			TextView sectionDoneTextView = (TextView) sectionRow.findViewById(R.id.textView_section_done_icon);
 			sectionDoneTextView.setVisibility(View.VISIBLE);
-		}
 
-		sectionRow.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.sectionId, mLearningLevel);
-			}
-		});
+			// user에게 섹션을 수강할 수 있도록 한다.
+			sectionRow.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.sectionId, mLearningLevel);
+				}
+			});
+		} else if (sectionId == mCurrentSection) {
+			sectionRow.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.sectionId, mLearningLevel);
+				}
+			});
+		} else {
+			sectionRow.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Toast.makeText(getActivity(), "섹션" + mCurrentSection + "을(를) 먼저 학습 완료 하셔야 합니다.", Toast.LENGTH_SHORT).show();
+				}
+			});
+		}
 	}
 
 	private void configureToolbar(View rootView) {
@@ -137,7 +154,6 @@ public class SyllabusFragment extends Fragment {
 			}
 		});
 	}
-
 
 	private void downloadSyllabusContent(int chapterId, int level) {
 		Volleyer.volleyer().get(getResources().getString(R.string.root_url) + "chapters/" + chapterId + "/levels/" + level + "/sections")

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp">
+
+    <TextView
+        android:id="@+id/textView_problem_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/colorAccent"
+        android:text="@string/problem_title"/>
+
+    <TextView
+        android:id="@+id/textView_problem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/colorPrimary"
+        android:text="다음 중 구조체에 대한 설명으로 알맞지 않은 것은?"
+        android:inputType="text|textMultiLine"
+        android:layout_below="@+id/textView_problem_title"
+        android:layout_marginTop="8dp"
+        android:textStyle="bold"/>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView_problem"
+        android:layout_marginTop="8dp"
+        android:id="@+id/radioGroup_problem">
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="답 1"
+            android:id="@+id/radioButton_answer_one"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="답 2"
+            android:id="@+id/radioButton_answer_two"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="답 3"
+            android:id="@+id/radioButton_answer_three"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="답 4"
+            android:id="@+id/radioButton_answer_four"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="답 5"
+            android:id="@+id/radioButton_answer_five"/>
+    </RadioGroup>
+
+</RelativeLayout>

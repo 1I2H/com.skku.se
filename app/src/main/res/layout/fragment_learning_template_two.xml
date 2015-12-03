@@ -8,10 +8,18 @@
         android:layout_height="match_parent">
 
         <include
+            android:id="@+id/layout_problem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            layout="@layout/layout_problem_row"
+            android:layout_marginTop="48dp"/>
+
+        <include
+            android:id="@+id/layout_question"
             layout="@layout/layout_question_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"/>
+            android:layout_below="@+id/layout_problem"/>
 
     </RelativeLayout>
 </ScrollView>
