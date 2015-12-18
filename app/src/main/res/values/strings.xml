@@ -1,5 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">맛있는 C</string>
+    <string name="app_admin_mode">관리자 페이지</string>
     <string name="action_settings">Settings</string>
 
     <string name="root_url">http://learningc-se-project.herokuapp.com/</string>
@@ -20,7 +22,10 @@
     <string name="sign_out">로그아웃</string>
     <string name="problem_title">여기서 문제!</string>
     <string name="ask">질문하기</string>
+    <string name="answer">답변하기</string>
     <string name="ask_hint">튜터에게 질문하고자 하는 내용을 적어주세요.</string>
+    <string name="answer_question">질문 답변</string>
+    <string name="answer_hint">답변을 적어주세요!</string>
     <string name="practical">실습해보기</string>
     <string name="copy_code">코드복사</string>
 
@@ -54,5 +59,167 @@
     <string name="no">아니요</string>
 
     <string name="done">완료</string>
+
+
+    <string name="one">
+       "\"만나서 반갑습니다.\"\n\"예 저도 만나서 반갑습니다.\"\n\"번호 좀 입력해주시겠습니까?\"\n\"감사합니다. 성함이?\"\n\n"
+       "여러분들 위와 같이 처음 만난 사람과 번호를 교환하며 핸드폰에 상대방에 대한 정보를 저장해 본 적이 있나요? 흔히 우리는 스마트폰의 연락처에 친구/지인의 전화 번호를 등록할 때 \"이름\"과 \"전화번호\"를 등록합니다."
+    </string>
+
+    <string name="two">
+        "예를 들어 \"홍길동\"이라는 친구의 연락처를 스마트폰 연락처에 등록하고자 한다고 해보죠."
+        "다음 그림과 같이  \"홍길동\"이라는 이름과 \"010-1234-5678\"이라는 전화번호를 각각의 입력란(\"이름\", \"전화번호\")에 입력하여 등록을 합니다. 이렇게 등록하게 되면 스마트폰의 연락처에 \"홍길동\"이라는 사람의 정보가 저장이 됩니다. 그리고 또 \"전화번호\" 외에 \"주소\" 또는 \"나이\"도 추가할 수 있습니다.\n\n"
+        "여기서 우리는 \"홍길동\" 이라는 사람을 그 사람의 나이, 주소, 전화번호 등 그 사람과 관련된 정보와 함께 ‘연락처’라는 이름으로 저장하는 것을 알 수 있죠? 이 ‘연락처’를 여러 개의 물품을 담는 꾸러미라고 합시다.\n\n"
+
+        "이 꾸러미를 사용하면 어떠한 장점이 있을까요? 먼저는 우리는 \"홍길동\"이라는 사람과 관련된 정보들을 여러 다른 곳에서 찾지 않아도, 이 한 꾸러미만 열어보면 \"홍길동\"과 관련된 모든 정보들을 찾을 수 있다는 장점이 있죠. 마치 방에 책을 책장에 모아서 정리하고 보고 싶은 책이 있으면 책장에 가서 찾는 것과 같은 원리죠.\n\n"
+
+        "하지만 꾸러미에는 한 가지 특징이 있는데요, 이 꾸러미에는 다양한 유형의 물품들을 넣을 수 있다는 점입니다. 책장은 오직 책 만을 꽂는 용도로 사용된다는 점에서 꾸러미와는 구별된다고 할 수 있습니다. 그러한 면에서 보면 꾸러미는 서랍이라고 보는 게 더 좋을 것 같아요. 서랍에는 책도 들어갈 수 있고, 외장하드를 넣어 놓을 수도 있고, 종이들을 넣어 놓을 수도 있죠. 이처럼 다양한 형태의 물품들이 존재하죠.\n\n"
+    </string>
+
+    <string name="three">
+        "이제 이를 실제 프로그램에서 볼까요? 책장은 우리가 앞서 배웠던 배열에 해당합니다. 배열은 오직 한 가지 형태의 자료형 만을 여러 개 담을 수 있는데요, 만약 다양한 자료형을 담고 싶다면 여러 개의 배열을 따로 사용해야겠죠. 그러나 이는 마치 책을 담을 책장을 하나 사고, 음악 앨범을 담을 책장을 새로 사듯이 매우 비효율적이라고 할 수 있죠.
+그래서 C언어에서는 ‘구조체’라는 새로운 자료형을 제공합니다. 구조체 안에는 int 형과 char형 또는 short, double형 등의 다양한 자료형을 함께 담을 수 있습니다. 코드 예시를 통해 좀더 이해해볼까요?"
+    </string>
+
+    <string name="four">
+        "struct Person_Contact_Info {\n"
+        "\tchar name[20];\n"
+        "\tchar phone_number[20];\n"
+        "\tchar address[100];\n"
+        "\tint age;\n"
+        "};"
+    </string>
+
+    <string name="five">
+        "이처럼 구조체 내에는 크기도 다양한 char형과 int형도 함께 담을 수 있습니다!\n\n"
+        "하지만 여기서 주의 깊게 보아야 할 것들이 몇 가지가 있는데요, 먼저는 맨 마지막에 ‘;’가 붙어있다는 점입니다. 변수나 함수 선언에 대해서는 앞서 배웠죠? 구조체 또한 선언하는 부분이기 때문에 맨 마지막에 ;를 붙여주어야 한답니다. 그렇지 않으면 컴파일 시 에러가 발생하죠. 구조체도 함수 선언하듯 한 줄로 쭉 써주어도 되지만, 사람이 보기 좋도록 표현하기 위해 위 식과 같이 쓰게 된 것이죠.\n\n"
+        "다시 말해,"
+    </string>
+
+    <string name="six">
+        "struct Person_Contact_Info {\n"
+        "\tchar name[20];\n"
+        "\tchar phone_number[20]\n"
+        "\tchar address[100]; int age;\n"
+        "};"
+    </string>
+
+    <string name="seven">
+        "다음과 같이 써주어도 아무런 문제가 없다는 것이죠!\n\n"
+        "그리고 또 한 가지 알아두어야 할 것은, 구조체 내에 정의된 변수들은 초기화를 하지 않아요.\n\n"
+        "예를 들어,"
+    </string>
+
+    <string name="eight">
+        "struct Person_Contact_Info {\n"
+    	"\tint age = 20;\n"
+        "};"
+    </string>
+    <string name="nine">
+        "다음과 같이 쓰게 되면, 에러가 난다는 것이죠. 왜 그러냐구요? 그것은 C를 만들고 표준으로 정하는 과정에서 초기화를 허용하지 않기로 했다고 하네요. 우리는 그냥 \"아 구조체 내에서는 변수에 초기화를 하면 안되는구나\"하고 넘어가면 될 것 같아요."
+    </string>
+
+
+    <string name="ten">
+        "struct Book {\n"
+       "\tint id;\n"
+       "\tint width:\n"
+       "\tint height;\n"
+       "};"
+    </string>
+
+    <string name="eleven">
+        "앞서 구조체는 “다양한 자료형의 변수들을 하나의 꾸러미로 만들어준다”고 말했습니다. 이 때문에 배열에서는 배열의 타입만으로 모든 원소의 타입을 알 수 있었지만 (예를 들어 int array[100] 이면 array 의 모든 원소의 타입은 int 형 이다) 구조체는 그렇지 않죠. 따라서 구조체는 정의할 때 모든 원소의 타입을 명시해 주어야 합니다. 위와 같이 말이죠.\n"
+        "위 그림에 Book이라는 구조체 내부에 있는 id, width, height는 흔히 구조체의 멤버라고 부릅니다. 이 Book라는 이름의 구조체는 3 개의 멤버를 가지고 있는데 각각의 멤버는 int id, int width, int height로 모두 int형을 가지고 있습니다.\n\n\n"
+        "물론 구조체 내부에도 배열을 선언할 수 있으므로, 다음과 같은 경우에는"
+    </string>
+
+    <string name="twelve">
+        "struct Book {\n"
+        "\tint arr[3];\n"
+        "};"
+    </string>
+
+    <string name="thirteen">
+        "으로 사용해도 무방하겠죠?\n\n"
+        "구조체의 일반적인 정의는 아래와 같습니다."
+    </string>
+
+    <string name="fourteen">
+        "struct 구조체이름 {\n"
+        "\tchar str[10];		// 구조체의 멤버: 변수형+변수명\n"
+        "\tint i;\n"
+        "};  			/*앞서 말했듯, 마지막에 꼭 ; 를 붙인다.*/"
+    </string>
+
+    <string name="fifteen">
+        "다음과 같이 구조체를 선언합니다. 위 선언에서 struct은 구조체를 선언하기 위한 예약어이고, 그 뒤 사용하고 싶은 구조체 이름을 적어줍니다. 그리고 { } 안에 구조체 안에 넣어서 사용할 변수를 적어줍니다."
+    </string>
+
+    <string name="sixteen">
+        "&lt;잠깐!"&gt;\n""예약어: 프로그래밍 언어 중에서 의미가 고정되어 있고, 사용자(user)가 작성하는 프로그램 상태에 따라서 의미를 변경할 수 없는 단어. 예를 들어 COBOL에서의 「AND」, 「BEFORE」, 「CLOSE」등이 예약어이다. 그 언어 특유의 규칙에 따라 의미가 고정되어 있어 프로그램에 사용하는 변수, 상수, 함수명 등으로 쓸 수 없는 명칭."
+    </string>
+
+    <!---->
+
+    <string name="seventeen">
+        "구조체도 하나의 변수형이라는 이야기를 앞서 했습니다. 그렇다면 구조체를 이용해서 새로운 변수들을 선언할 수 있겠죠?"
+    </string>
+
+    <string name="eighteen">
+        "변수를 선언하는 방법에는 두 가지가 있습니다. 첫 번째는 구조체 선언 시, 변수도 함께 선언해주는 것이고, 나머지 한 가지 방법은 따로 구조체 변수를 선언해주는 것이죠."
+    </string>
+
+    <string name="nineteen">
+        "첫 번째 방법을 먼저 보면, 예를 들어"
+    </string>
+
+    <string name="twenty">
+        "struct Book {\n"
+        "\tchar id[30];\n"
+    	"\tchar writer[30];\n"
+	    "\tint width;\n"
+    	"\tint height;\n"
+        "} Mobydick;"
+    </string>
+
+    <string name="twentyone">
+        "과 같이 ;가 끝나기 전에 Mobydick 이라는 구조체 변수를 선언할 수 있습니다.\n이를 두 번째 방법으로 표현하면,"
+    </string>
+
+    <string name="twentytwo">
+        "struct Book {\n"
+	    "\tchar id[30];\n"
+	    "\tchar writer[30];\n"
+    	"\tint width;\n"
+	    "\tint height;\n"
+        "};\n"
+        "struct Book Mobydick;"
+    </string>
+
+    <string name="twentythree">
+        "이 됩니다.\n첫 번째 방법은 구조체 선언과 함께 변수 선언함께 되었다면, 두 번째 방법은 구조체 Book에 대해 선언을 따로 해준 뒤, 변수만 따로 선언을 한 것이죠.\n\n혹시 위의 내용이 어려운가요? 그렇다면 우리가 실생활에서 쓰는 물건을 구조체로 만들어 볼까요?"
+    </string>
+
+    <string name="twentyfour">
+        "위의 그림에 있는 많은 책들을 다음과 같이 코드로 나타낼 수 있어요."
+    </string>
+
+    <string name="twentyfive">
+        "struct Book {\n"
+    	"\tchar id[30];\n"
+	    "\tchar writer[30];\n"
+    	"\tint width;\n"
+	    "\tint height;\n"
+        "};"
+    </string>
+
+    <string name="twentysix">
+        "다음 코드는 많은 책들 중에서 Mobydick이라는 책입니다."
+    </string>
+
+    <string name="twentyseven">
+        "struct Book Mobydick;"
+    </string>
 
 </resources>

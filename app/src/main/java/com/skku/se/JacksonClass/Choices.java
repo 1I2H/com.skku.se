@@ -3,11 +3,11 @@ package com.skku.se.JacksonClass;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * Created by XEiN on 11/26/15.
+ * Created by XEiN on 12/4/15.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AbstractSectionInfo {
-	public int section_id;
+public class Choices {
+	public int choice_no;
 
-	public String section_title;
+	public String choice_detail;
 }

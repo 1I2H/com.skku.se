@@ -3,23 +3,42 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/imageView_compile_process"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/compile_process"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/textView_learning_contents_two"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14sp"
+            />
 
         <include
             android:id="@+id/layout_problem"
+            layout="@layout/layout_problem_row"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            layout="@layout/layout_problem_row"
-            android:layout_marginTop="48dp"/>
+            android:layout_marginTop="16dp"/>
 
         <include
             android:id="@+id/layout_question"
             layout="@layout/layout_question_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/layout_problem"/>
+            android:layout_below="@+id/layout_problem"
+            android:layout_marginBottom="40dp"/>
 
-    </RelativeLayout>
+    </LinearLayout>
 </ScrollView>

@@ -10,7 +10,8 @@
     <com.skku.se.NoSwipeViewpager
         android:id="@+id/viewPager_learning"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar_learning"/>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_learning"
@@ -36,8 +37,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#BFFFFFFF"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:background="#BFFFFFFF">
 
         <Button
             android:id="@+id/button_previous_page"
@@ -66,12 +67,12 @@
     </RelativeLayout>
 
     <ProgressBar
+        android:id="@+id/progressBar_learning"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/progressBar_learning"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
 
 
 </RelativeLayout>

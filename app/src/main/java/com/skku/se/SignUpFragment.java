@@ -135,7 +135,7 @@ public class SignUpFragment extends Fragment implements View.OnClickListener, Al
 				public void onResponse(String response) {
 					mSignUpFragmentCallback.stopProgressBar();
 					try {
-						saveSessionInSharedPreference((new JSONObject(response).optInt("userId")));
+						saveSessionInSharedPreference((new JSONObject(response).optInt("user_id")));
 						saveUserIDAndPasswordInSharedPreference();
 						Log.d(TAG, response.toString());
 						showWelcomeDialog();

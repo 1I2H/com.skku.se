@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -20,9 +21,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.navercorp.volleyextensions.volleyer.Volleyer;
 import com.skku.se.JacksonClass.SectionContent;
+import com.skku.se.JacksonClass.SectionInfo;
 import com.skku.se.JacksonClass.SyllabusInfo;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,6 +45,8 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 	private int mSectionId;
 	private int mChapterId;
 	private int mLearningLevel;
+
+	private SectionInfo mSectionInfo;
 
 	private int mTotalSectionCount = 0;
 
@@ -86,11 +89,13 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 	private void downloadCurrentSectionLearningContents() {
 		Volleyer.volleyer()
 				.get(getResources().getString(R.string.root_url) + "chapters/" + mChapterId + "/levels/" + mLearningLevel + "/sections/" + mSectionId)
-				.withTargetClass(SectionContent.class).withListener(new Response.Listener<SectionContent>() {
+				.withTargetClass(SectionInfo.class).withListener(new Response.Listener<SectionInfo>() {
 			@Override
-			public void onResponse(SectionContent response) {
+			public void onResponse(SectionInfo response) {
+				Log.d(TAG, response.content.section_title);
 				stopProgressBar();
-				configureToolbar(response.sectionTitle, response.chapterTitle);
+				mSectionInfo = response;
+				configureToolbar(response.content.section_title, response.content.chapter_title);
 				configureFragmentViewPager(response);
 				configurePageControlButtons();
 			}
@@ -151,6 +156,7 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 	@Override
 	public void onClickPositiveButton() {
 		Toast.makeText(LearningActivity.this, "학습 진행 정보가 저장되었습니다.", Toast.LENGTH_SHORT).show();
+		setResult(RESULT_OK);
 		finish();
 	}
 
@@ -191,10 +197,10 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 		downloadCurrentSectionLearningContents();
 	}
 
-	private void configureFragmentViewPager(SectionContent sectionContent) {
+	private void configureFragmentViewPager(SectionInfo sectionInfo) {
 		mLearningFragmentViewPager = (NoSwipeViewpager) findViewById(R.id.viewPager_learning);
 		mLearningFragmentViewPager.setPagingEnabled(false);
-		mLearningFragmentPagerAdapter = new LearningFragmentPagerAdapter(getSupportFragmentManager(), sectionContent);
+		mLearningFragmentPagerAdapter = new LearningFragmentPagerAdapter(getSupportFragmentManager(), sectionInfo);
 
 		mLearningFragmentViewPager.setAdapter(mLearningFragmentPagerAdapter);
 
@@ -263,9 +269,8 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 
 	private String makeJSONTypeLearningProgressData() {
 		try {
-			// TODO fix the key name of the section id
 			JSONObject learningProgressData = new JSONObject();
-			learningProgressData.put("section_id", mSectionId);
+			learningProgressData.put("chapter_id", mChapterId);
 			learningProgressData.put("level", mLearningLevel);
 
 			return learningProgressData.toString();
@@ -276,7 +281,7 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 	}
 
 	private void uploadLearningProgressData() {
-		Volleyer.volleyer().put(getResources().getString(R.string.root_url) + "user/progress-section")
+		Volleyer.volleyer().put(getResources().getString(R.string.root_url) + "user/current-section")
 				.addHeader("Authorization", restoreSessionFromSharedPreferences()).addHeader("Content-Type", "application/json")
 				.withBody(makeJSONTypeLearningProgressData()).withListener(new Response.Listener<String>() {
 			@Override
@@ -315,12 +320,16 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 		}
 	};
 
-	public static class LearningFragmentPagerAdapter extends FragmentStatePagerAdapter {
-		private SectionContent mSectionContent;
+	public SectionInfo getSectionInfo() {
+		return mSectionInfo;
+	}
 
-		public LearningFragmentPagerAdapter(FragmentManager fragmentManager, SectionContent sectionContent) {
+	public static class LearningFragmentPagerAdapter extends FragmentStatePagerAdapter {
+		private SectionInfo mSectionInfo;
+
+		public LearningFragmentPagerAdapter(FragmentManager fragmentManager, SectionInfo sectionInfo) {
 			super(fragmentManager);
-			mSectionContent = sectionContent;
+			mSectionInfo = sectionInfo;
 		}
 
 		@Override
@@ -331,9 +340,10 @@ public class LearningActivity extends AppCompatActivity implements AlertDialogFr
 		@Override
 		public Fragment getItem(int position) {
 			Bundle bundle = new Bundle();
-			bundle.putInt("chapterId", mSectionContent.chapterId);
-			bundle.putInt("level", mSectionContent.level);
-			bundle.putInt("sectionId", mSectionContent.sectionId);
+			bundle.putInt("chapter_id", mSectionInfo.content.chapter_id);
+			bundle.putInt("level", mSectionInfo.content.level);
+			bundle.putInt("section_id", mSectionInfo.content.section_id);
+			bundle.putString("section_title", mSectionInfo.content.section_title);
 			return LearningFragment.newInstance(position + 1, bundle);
 		}
 	}

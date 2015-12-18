@@ -9,11 +9,11 @@ import java.util.ArrayList;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AbstractChapterInfo {
-	public int chapterId;
+	public int chapter_id;
 
-	public String chapterTitle;
+	public String chapter_title;
 
-	public int currentLevel;
+	public int current_level;
 
-	public ArrayList<AbstractLevelInfo> progressInfo;
+	public ArrayList<AbstractLevelInfo> progress_info;
 }

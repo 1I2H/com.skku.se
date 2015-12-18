@@ -8,51 +8,19 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-
-        <RelativeLayout
+        <TextView
+            android:id="@+id/textView_learning_contents_three"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:layout_marginTop="48dp">
-
-            <TextView
-                android:id="@+id/textView_practical_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/practical"
-                android:textColor="@color/colorPrimary"
-                android:textSize="20sp"/>
-
-            <TextView
-                android:id="@+id/textView_practical_problem"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textView_practical_title"
-                android:layout_marginTop="16dp"
-                android:text="실습 문제입니다. 다음 문제를 아래 코딩 작성란을 통해 풀어주세요:"/>
-
-            <TextView
-                android:id="@+id/textView_hint_code"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textView_practical_problem"
-                android:layout_marginTop="8dp"
-                android:text="@string/hint_code"
-                android:textColor="@color/colorAccent"
-                android:textSize="14sp"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/copy_code"
-                android:id="@+id/button_copy"
-                android:layout_below="@+id/textView_hint_code"/>
-        </RelativeLayout>
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"/>
 
         <WebView
             android:id="@+id/webView_practical"
             android:layout_width="match_parent"
-            android:layout_height="800dp"/>
+            android:layout_height="800dp"
+            android:visibility="gone"/>
 
     </LinearLayout>
 </ScrollView>

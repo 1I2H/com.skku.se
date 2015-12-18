@@ -103,10 +103,10 @@ public class SyllabusFragment extends Fragment {
 
 	private void configureSectionRow(View sectionRow, final AbstractSectionInfo abstractSectionInfo, int index) {
 		TextView sectionNumberIconTextView = (TextView) sectionRow.findViewById(R.id.textView_section_number_icon);
-		sectionNumberIconTextView.setText(String.valueOf(abstractSectionInfo.sectionId));
+		sectionNumberIconTextView.setText(String.valueOf(abstractSectionInfo.section_id));
 
 		TextView sectionNameTextView = (TextView) sectionRow.findViewById(R.id.textView_section_name);
-		sectionNameTextView.setText(abstractSectionInfo.sectionTitle);
+		sectionNameTextView.setText(abstractSectionInfo.section_title);
 
 		final int sectionId = index + 1;
 		// 이미 수강한 섹션들의 경
@@ -119,14 +119,14 @@ public class SyllabusFragment extends Fragment {
 			sectionRow.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.sectionId, mLearningLevel);
+					mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.section_id, mLearningLevel);
 				}
 			});
 		} else if (sectionId == mCurrentSection) {
 			sectionRow.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.sectionId, mLearningLevel);
+					mSyllabusFragmentCallback.onClickSectionButton(mChapterId, abstractSectionInfo.section_id, mLearningLevel);
 				}
 			});
 		} else {
@@ -160,7 +160,7 @@ public class SyllabusFragment extends Fragment {
 				.withTargetClass(SyllabusInfo.class).withListener(new Response.Listener<SyllabusInfo>() {
 			@Override
 			public void onResponse(SyllabusInfo response) {
-				mToolbar.setTitle(response.chapterTitle);
+				mToolbar.setTitle(response.chapter_title);
 				if (mLearningLevel == 1) {
 					mToolbar.setSubtitle("Beginner class");
 				} else {

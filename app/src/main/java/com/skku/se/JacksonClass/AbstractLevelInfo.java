@@ -7,11 +7,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AbstractLevelInfo {
-	public int level;
+	public int chapter_id;
 
-	public int progressSection;
+	public String level;
 
-	public String progressDetail;
+	public int current_section;
 
-	public int progressPercentage;
+	public String section_title;
+
+	public int progress_percentage;
 }

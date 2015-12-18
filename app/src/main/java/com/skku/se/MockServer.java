@@ -43,8 +43,8 @@ public class MockServer {
 				}
 			}
 
-			mOverAllContents.put("learningInfo", learningInfo);
-			mOverAllContents.put("qnA", makeQnAList());
+			mOverAllContents.put("learning_info", learningInfo);
+			mOverAllContents.put("qna", makeQnAList());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -78,11 +78,11 @@ public class MockServer {
 
 	private JSONObject makeQnA() throws JSONException {
 		JSONObject qnAObject = new JSONObject();
-		qnAObject.put("sectionName", "구조체");
+		qnAObject.put("section_title", "구조체");
 		qnAObject.put("question", "구조체 포인터에 관한 질분입니다.");
-		qnAObject.put("questionDate", "15/11/07");
+		qnAObject.put("question_date", "15/11/07");
 		qnAObject.put("answer", "답변입니다.");
-		qnAObject.put("answerDate", "15/11/07");
+		qnAObject.put("answer_date", "15/11/07");
 
 		return qnAObject;
 	}

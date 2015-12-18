@@ -10,9 +10,9 @@ import java.util.ArrayList;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MainPageContents {
-	@JsonProperty("learningInfo")
-	public ArrayList<AbstractChapterInfo> learningInfo;
+	@JsonProperty("learning_info")
+	public ArrayList<AbstractChapterInfo> learning_info;
 
-	@JsonProperty("qnA")
-	public ArrayList<QnAInfo> qnA;
+	@JsonProperty("qna")
+	public ArrayList<QnAInfo> qna;
 }

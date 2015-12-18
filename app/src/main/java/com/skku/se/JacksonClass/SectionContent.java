@@ -7,13 +7,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SectionContent {
-	public int chapterId;
+	public int chapter_id;
 
-	public String chapterTitle;
+	public String chapter_title;
 
 	public int level;
 
-	public int sectionId;
+	public int section_id;
 
-	public String sectionTitle;
+	public String section_title;
+
+	public String section_detail1;
+
+	public String section_detail2;
+
+	public String section_detail3;
 }

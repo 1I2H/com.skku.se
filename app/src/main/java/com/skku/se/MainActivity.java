@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,10 +37,14 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements SyllabusFragment.SyllabusFragmentCallback,
 		AlertDialogFragment.AlertDialogFragmentCallback {
+
+	public static final String USER_ID = "user_id";
 	public static final String CHAPTER_ID = "chapter_id";
 	public static final String SECTION_ID = "section_id";
 	public static final String LEARNING_LEVEL = "learning_level";
 	private static final String TAG = "MainActivity";
+	public static final int LEARNING_REQUEST = 1;
+
 	private LinearLayout mLearningChapterListLinearLayout;
 	private LinearLayout mQnALinearLayout;
 
@@ -52,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 	private TextView mTempChapterProgressTextView;
 	private TextView mTempTextView;
 	private Button mTempContinueChapterButton;
+	private Button mTempSeeSyllabusButton;
 
 	private String mRootUrl;
 	private int mCurrentChapterIndex = 0;
@@ -59,11 +65,10 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		@Override
 		public void onResponse(MainPageContents response) {
 			stopProgressBar();
-			mAbstractChapterInfo = response.learningInfo;
-			mQnAInfo = response.qnA;
+			mAbstractChapterInfo = response.learning_info;
+			mQnAInfo = response.qna;
 
 			configureLearningList();
-			configureQnAList();
 		}
 	};
 
@@ -103,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 
 	private String restoreSessionFromSharedPreferences() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		Log.d(TAG, String.valueOf(sharedPreferences.getInt(Preferences.SESSION_ID, -1)));
 		return String.valueOf(sharedPreferences.getInt(Preferences.SESSION_ID, -1));
 	}
 
@@ -115,11 +121,11 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		if (getSupportFragmentManager().getBackStackEntryCount() >= 1) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
+				super.onBackPressed();
 			}
 		} else {
 			showApplicationTerminationDialog();
 		}
-		super.onBackPressed();
 	}
 
 	private void showApplicationTerminationDialog() {
@@ -159,13 +165,13 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 			QnAInfo qnAContent = mQnAInfo.get(i);
 
 			View questionRow = inflateQnARow(true);
-			configureQnARow(questionRow, qnAContent.sectionName, qnAContent.question, qnAContent.questionDate, true);
+			configureQnARow(questionRow, qnAContent.section_title, qnAContent.question, qnAContent.question_date, true);
 			mQnALinearLayout.addView(questionRow);
 
-			if (!qnAContent.answer.equals(null)) {
+			if (qnAContent.answer != null) {
 				View answerRow;
 				answerRow = inflateQnARow(false);
-				configureQnARow(answerRow, qnAContent.sectionName, qnAContent.answer, qnAContent.answerDate, false);
+				configureQnARow(answerRow, qnAContent.section_title, qnAContent.answer, qnAContent.answer_date, false);
 				mQnALinearLayout.addView(answerRow);
 			}
 		}
@@ -186,20 +192,20 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		TextView chapterTitleTextView = (TextView) chapterRow.findViewById(R.id.textView_chapter_title);
 		final TextView chapterProgressTextView = (TextView) chapterRow.findViewById(R.id.textView_chapter_progress);
 		final Button continueChapterButton = (Button) chapterRow.findViewById(R.id.button_continue_chapter);
-		final Button seeSectionsChapterButton = (Button) chapterRow.findViewById(R.id.button_see_sections_chapter);
+		final Button seeSyllabusChapterButton = (Button) chapterRow.findViewById(R.id.button_see_sections_chapter);
 		final TextView learningLevelChapterTextView = (TextView) chapterRow.findViewById(R.id.textView_learning_level_chapter);
 		ImageView configureLearningLevelChapterImageView = (ImageView) chapterRow.findViewById(R.id.imageView_configure_learning_level_chapter);
 
-		final int chapterId = abstractChapterInfo.chapterId;
-		final int learningLevel = abstractChapterInfo.currentLevel;
-		final int currentSection = abstractChapterInfo.progressInfo.get(learningLevel - 1).progressSection;
-		final String chapterTitle = abstractChapterInfo.chapterTitle;
-		final int progress = abstractChapterInfo.progressInfo.get(learningLevel - 1).progressPercentage;
+		final int chapterId = abstractChapterInfo.chapter_id;
+		final int learningLevel = abstractChapterInfo.current_level;
+		final int currentSection = abstractChapterInfo.progress_info.get(learningLevel - 1).current_section;
+		final String chapterTitle = abstractChapterInfo.chapter_title;
+		final int progress = abstractChapterInfo.progress_info.get(learningLevel - 1).progress_percentage;
 
 		learningLevelChapterTextView.setText(configureLearningLevel(learningLevel));
 		learningLevelChapterTextView.setBackgroundResource(configureLearningLevelIcon(learningLevel));
 
-		chapterProgressTextView.setText(abstractChapterInfo.progressInfo.get(learningLevel - 1).progressDetail);
+		chapterProgressTextView.setText(abstractChapterInfo.progress_info.get(learningLevel - 1).section_title);
 
 		chapterTitleTextView.setText(chapterTitle);
 
@@ -209,6 +215,13 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 			continueChapterButton.setText(R.string.start_learning);
 		}
 
+		if (progress == 100) {
+			continueChapterButton.setText(R.string.finish_learning);
+			continueChapterButton.setEnabled(false);
+		} else {
+			continueChapterButton.setEnabled(true);
+		}
+
 		continueChapterButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -216,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 			}
 		});
 
-		seeSectionsChapterButton.setOnClickListener(new View.OnClickListener() {
+		seeSyllabusChapterButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				showSyllabus(chapterId, currentSection, learningLevel);
@@ -231,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 				mTempTextView = learningLevelChapterTextView;
 				mTempChapterProgressTextView = chapterProgressTextView;
 				mTempContinueChapterButton = continueChapterButton;
+				mTempSeeSyllabusButton = seeSyllabusChapterButton;
 
 				showLearningLevelSelectionDialog();
 			}
@@ -258,13 +272,13 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		qnAIconTextView.setText(configureQnAIconText(isQuestion));
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
 			qnAIconTextView.setBackground(getResources().getDrawable(configureQnAIcon(isQuestion)));
+			qnASectionNameTextView.setText(qnASectionName);
 		} else {
 			qnAIconTextView.setBackground(getDrawable(configureQnAIcon(isQuestion)));
+			qnASectionNameTextView.setVisibility(View.GONE);
 		}
 		qnADetailTextView.setText(qnADetail);
 		qnADateTextView.setText(qnADate);
-
-		qnASectionNameTextView.setText(qnASectionName);
 	}
 
 	private String configureLearningLevel(int level) {
@@ -333,7 +347,18 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		intent.putExtra(CHAPTER_ID, chapterId);
 		intent.putExtra(SECTION_ID, sectionId);
 		intent.putExtra(LEARNING_LEVEL, learningLevel);
-		startActivity(intent);
+		startActivityForResult(intent, LEARNING_REQUEST);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == LEARNING_REQUEST) {
+			if (resultCode == RESULT_OK) {
+				mLearningChapterListLinearLayout.removeAllViews();
+				mQnALinearLayout.removeAllViews();
+				downloadMainPageContent();
+			}
+		}
 	}
 
 	@Override
@@ -358,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 
 	private void clearSharedPreference() {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		sharedPreferences.edit().clear().commit();
+		sharedPreferences.edit().clear().apply();
 	}
 
 	private void restartApplication() {
@@ -384,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 	}
 
 	private void uploadCurrentLearningLevelData() {
-		Volleyer.volleyer().put(mRootUrl + "user/current-section").addHeader("Authorization", restoreSessionFromSharedPreferences())
+		Volleyer.volleyer().put(mRootUrl + "user/current-level").addHeader("Authorization", restoreSessionFromSharedPreferences())
 				.addHeader("Content-Type", "application/json").withBody(makeJSONTypeCurrentLearningLevelData())
 				.withListener(new Response.Listener<String>() {
 					@Override
@@ -405,14 +430,16 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 			JSONArray currentLevels = new JSONArray();
 			for (int i = 0; i < Preferences.LEARNING_CHAPTER_COUNT; i++) {
 				JSONObject tempObject = new JSONObject();
-				tempObject.put("chapter_id", mAbstractChapterInfo.get(i).chapterId);
-				tempObject.put("current_level", mAbstractChapterInfo.get(i).currentLevel);
+				tempObject.put("chapter_id", mAbstractChapterInfo.get(i).chapter_id);
+				tempObject.put("current_level", mAbstractChapterInfo.get(i).current_level);
 
 				currentLevels.put(tempObject);
 			}
 			currentLearningLevelData.put("current_levels", currentLevels);
 			return currentLearningLevelData.toString();
 		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -422,13 +449,34 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 	public void onClickNegativeButton() {}
 
 	@Override
-	public void onClickSelectionButton(int index) {
-		int learningLevel = index + 1;
-		AbstractChapterInfo abstractChapterInfo = mAbstractChapterInfo.get(mCurrentChapterIndex);
+	public void onClickSelectionButton(final int index) {
+		final int learningLevel = index + 1;
+		final AbstractChapterInfo abstractChapterInfo = mAbstractChapterInfo.get(mCurrentChapterIndex);
 		updateLearningChapterView(learningLevel,
-				abstractChapterInfo.progressInfo.get(index).progressDetail,
-				abstractChapterInfo.progressInfo.get(index).progressPercentage);
-		mAbstractChapterInfo.get(mCurrentChapterIndex).currentLevel = learningLevel;
+				abstractChapterInfo.progress_info.get(index).section_title,
+				abstractChapterInfo.progress_info.get(index).progress_percentage);
+		mAbstractChapterInfo.get(mCurrentChapterIndex).current_level = learningLevel;
+
+		mTempContinueChapterButton.setOnClickListener(null);
+		mTempSeeSyllabusButton.setOnClickListener(null);
+
+		mTempContinueChapterButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showLearningContents(abstractChapterInfo.progress_info.get(index).chapter_id,
+						abstractChapterInfo.progress_info.get(index).current_section,
+						learningLevel);
+			}
+		});
+
+		mTempSeeSyllabusButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showSyllabus(abstractChapterInfo.progress_info.get(index).chapter_id,
+						abstractChapterInfo.progress_info.get(index).current_section,
+						learningLevel);
+			}
+		});
 	}
 
 	private void updateLearningChapterView(int learningLevel, String progressDetail, int progress) {
@@ -436,10 +484,18 @@ public class MainActivity extends AppCompatActivity implements SyllabusFragment.
 		mTempTextView.setBackgroundResource(configureLearningLevelIcon(learningLevel));
 		mTempChapterProgressTextView.setText(progressDetail);
 		mTempCircleProgress.setProgress(progress);
-		if (isNewStart(mAbstractChapterInfo.get(mCurrentChapterIndex).progressInfo.get(learningLevel - 1).progressSection)) {
+
+		if (isNewStart(mAbstractChapterInfo.get(mCurrentChapterIndex).progress_info.get(learningLevel - 1).current_section)) {
 			mTempContinueChapterButton.setText(R.string.start_learning);
 		} else {
 			mTempContinueChapterButton.setText(R.string.continue_learning);
+		}
+
+		if (progress == 100) {
+			mTempContinueChapterButton.setText(R.string.finish_learning);
+			mTempContinueChapterButton.setEnabled(false);
+		} else {
+			mTempContinueChapterButton.setEnabled(true);
 		}
 	}
 }

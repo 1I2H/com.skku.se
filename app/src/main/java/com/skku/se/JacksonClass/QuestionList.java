@@ -5,13 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 
 /**
- * Created by XEiN on 11/26/15.
+ * Created by XEiN on 12/3/15.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SyllabusInfo {
-	public int chapter_id;
-
-	public String chapter_title;
-
-	public ArrayList<AbstractSectionInfo> sections;
+public class QuestionList {
+	public ArrayList<QuestionInfo> questions;
 }

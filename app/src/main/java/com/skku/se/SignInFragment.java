@@ -35,7 +35,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 	private static final String TAG = "SignInFragment";
 
 	private SharedPreferences mSharedPreferences;
-	
+
 	private EditText mUserIdEditText;
 	private EditText mUserPasswordEditText;
 	private Button mSignInButton;
@@ -106,16 +106,6 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 		}
 	}
 
-	private boolean isUserInputDataValid() {
-		String emailAddress = mUserIdEditText.getText().toString();
-		if (isValidEmail(emailAddress)) {
-			return !emailAddress.isEmpty() && !mUserPasswordEditText.getText().toString().isEmpty();
-		} else {
-			Toast.makeText(getActivity(), "잘못된 이메일 형식입니다.", Toast.LENGTH_SHORT).show();
-			return false;
-		}
-	}
-
 	private JSONObject makeJSONTypeUserInputData() {
 		try {
 			JSONObject userInputData = new JSONObject();
@@ -129,47 +119,40 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 		return null;
 	}
 
-	private boolean isValidEmail(String email) {
-		boolean err = false;
-
-		String regex = "^[_a-zA-Z0-9-\\.]+@[\\.a-zA-Z0-9-]+\\.[a-zA-Z]+$";
-		Pattern p = Pattern.compile(regex);
-		Matcher m = p.matcher(email);
-
-		if (m.matches()) {
-			err = true;
-		}
-		return err;
-	}
 
 	private void inquireUserInfoFromServer() {
-		if (isUserInputDataValid()) {
-			mSignInFragmentCallback.startProgressBar();
-			Volleyer.volleyer().post(getResources().getString(R.string.root_url) + "user/session").addHeader("Content-Type", "application/json")
-					.withBody(makeJSONTypeUserInputData().toString()).withListener(new Response.Listener<String>() {
-				@Override
-				public void onResponse(String response) {
-					mSignInFragmentCallback.stopProgressBar();
-					try {
-						Log.d(TAG, response.toString());
-						saveSessionInSharedPreference((new JSONObject(response).optInt("userId")));
+		mSignInFragmentCallback.startProgressBar();
+		Volleyer.volleyer().post(getResources().getString(R.string.root_url) + "user/session").addHeader("Content-Type", "application/json")
+				.withBody(makeJSONTypeUserInputData().toString()).withListener(new Response.Listener<String>() {
+			@Override
+			public void onResponse(String response) {
+				mSignInFragmentCallback.stopProgressBar();
+				try {
+					Log.d(TAG, response.toString());
+					JSONObject temp = new JSONObject(response);
+					saveSessionInSharedPreference(temp.optInt("user_id"));
+					if (temp.optInt("user_id") != 1) {
 						callMainActivity();
-					} catch (JSONException e) {
-						e.printStackTrace();
+					} else {
+						callAdminActivity();
 					}
+				} catch (JSONException e) {
+					e.printStackTrace();
 				}
-			}).withErrorListener(new Response.ErrorListener() {
-				@Override
-				public void onErrorResponse(VolleyError error) {
-					mSignInFragmentCallback.stopProgressBar();
-					Toast.makeText(getActivity(), "로그인에 실패하였습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-				}
-			}).execute();
-		}
+			}
+		}).withErrorListener(new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				mSignInFragmentCallback.stopProgressBar();
+				Toast.makeText(getActivity(), "로그인에 실패하였습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+			}
+		}).execute();
+
 	}
 
 	private void saveSessionInSharedPreference(int userId) {
 		if (mSharedPreferences.getInt(Preferences.SESSION_ID, -1) == -1) {
+			Log.d(TAG, "saveSessionInSharedPreferences");
 			mSharedPreferences.edit().putInt(Preferences.SESSION_ID, userId).apply();
 		}
 	}
@@ -184,6 +167,12 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 
 	private void callMainActivity() {
 		Intent intent = new Intent(getActivity(), MainActivity.class);
+		startActivity(intent);
+		getActivity().finish();
+	}
+
+	private void callAdminActivity() {
+		Intent intent = new Intent(getActivity(), AdminActivity.class);
 		startActivity(intent);
 		getActivity().finish();
 	}
